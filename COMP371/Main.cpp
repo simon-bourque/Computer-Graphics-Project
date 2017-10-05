@@ -24,6 +24,7 @@ int main() {
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) {
 		std::cout << "Error: failed to initialize glew." << std::endl;
+		return 1;
 	}
 
 	glEnable(GL_DEPTH_TEST);
