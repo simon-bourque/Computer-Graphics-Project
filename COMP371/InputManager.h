@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <vector>
 
 class InputManager {
 
@@ -14,6 +15,8 @@ public:
 	void setCamera();//Camera* camera);
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
 
+	void registerKey(int key, void(*function)());
+
 private:
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -23,6 +26,8 @@ private:
 	GLFWwindow* m_window;
 	glm::vec2 m_mouse_position;
 	//Camera* m_cam;
+	std::vector<int> m_keys;
+	std::vector<void(*)()> m_key_function_ptrs;
 
 	// Settings
 	bool m_setting_verbose;

@@ -12,6 +12,10 @@ GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
 
+void test() {
+	std::cout << "test" << std::endl;
+}
+
 int main() {
 
 	// Initialize GLFW
@@ -20,6 +24,7 @@ int main() {
 	InputManager* inputManager = new InputManager(window);
 	inputManager->init();
 	//inputManager->setCamera(Camera* camera);
+	inputManager->registerKey(GLFW_KEY_A , test);
 	inputManager->setVerbose(true);
 
 	if (!window) {

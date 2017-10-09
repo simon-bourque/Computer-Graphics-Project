@@ -32,9 +32,25 @@ void InputManager::setCamera()//Camera* camera)
 	//m_camera = camera;
 }
 
+/*
+	Had to read https://stackoverflow.com/questions/15128444/c-calling-a-function-from-a-vector-of-function-pointers-inside-a-class-where-t
+*/
+void InputManager::registerKey(int key, void(*function)())
+{
+	m_keys.push_back(key);
+	m_key_function_ptrs.push_back(function);
+}
+
 void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-
+	if (m_setting_verbose) std::cout << "key " << key << " pressed" << std::endl;
+	for(int i = 0; i < m_keys.size(); i++)
+	{
+		if (m_keys.at(i) == key)
+		{
+			m_key_function_ptrs.at(i)();
+		}
+	}
 }
 
 void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos)
