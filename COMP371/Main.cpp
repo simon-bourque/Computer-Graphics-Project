@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Types.h"
+#include "InputManager.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -15,6 +16,12 @@ int main() {
 
 	// Initialize GLFW
 	GLFWwindow* window = initGLFW();
+
+	InputManager* inputManager = new InputManager(window);
+	inputManager->init();
+	//inputManager->setCamera(Camera* camera);
+	inputManager->setVerbose(true);
+
 	if (!window) {
 		// Failed to load window
 		return 1;
