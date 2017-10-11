@@ -44,6 +44,12 @@ void InputManager::registerDebugKey(int key, void(*function)())
 	m_debug_keys.push_back(t);
 }
 
+void InputManager::setCursorInvisible(bool setting)
+{
+	m_setting_cursor_invisible = setting;
+	m_setting_cursor_invisible ? glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
 void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (action == GLFW_PRESS || (action == GLFW_REPEAT && m_setting_key_repeat))
@@ -62,6 +68,9 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 			case GLFW_KEY_D:
 				if (m_setting_verbose) std::cout << "D pressed" << std::endl;
 				break;
+
+			case GLFW_KEY_F1:
+				setCursorInvisible(!m_setting_cursor_invisible);
 		}
 	}
 

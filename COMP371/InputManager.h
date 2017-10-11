@@ -16,6 +16,9 @@ public:
 	void setCamera();//Camera* camera);
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
 	void setKeyRepeat(bool setting) { m_setting_key_repeat = setting; };
+	void setCursorInvisible(bool setting);
+
+	glm::vec2 getMousePosition() { return m_mouse_position; };
 
 	void registerDebugKey(int key, void(*function)());
 
@@ -33,6 +36,7 @@ private:
 	// Settings
 	bool m_setting_verbose;
 	bool m_setting_key_repeat;
+	bool m_setting_cursor_invisible;
 
 	// Wrapper
 	class GLFWCallbackWrapper {
