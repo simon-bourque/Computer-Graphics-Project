@@ -15,6 +15,7 @@ InputManager::~InputManager()
 	glfwSetKeyCallback(m_window, NULL);
 	glfwSetCursorPosCallback(m_window, NULL);
 	glfwSetMouseButtonCallback(m_window, NULL);
+	glfwSetErrorCallback(NULL);
 }
 
 bool InputManager::init()
@@ -35,20 +36,41 @@ void InputManager::setCamera()//Camera* camera)
 /*
 	Had to read https://stackoverflow.com/questions/15128444/c-calling-a-function-from-a-vector-of-function-pointers-inside-a-class-where-t
 */
-void InputManager::registerKey(int key, void(*function)())
+void InputManager::registerDebugKey(int key, void(*function)())
 {
-	m_keys.push_back(key);
-	m_key_function_ptrs.push_back(function);
+	std::tuple<int, void(*)> t;
+	std::get<0>(t) = key;
+	std::get<1>(t) = function;
+	m_debug_keys.push_back(t);
 }
 
 void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (m_setting_verbose) std::cout << "key " << key << " pressed" << std::endl;
-	for(int i = 0; i < m_keys.size(); i++)
+	if (action == GLFW_PRESS || (action == GLFW_REPEAT && m_setting_key_repeat))
 	{
-		if (m_keys.at(i) == key)
+		switch (key)
 		{
-			m_key_function_ptrs.at(i)();
+			case GLFW_KEY_W:
+				if (m_setting_verbose) std::cout << "W pressed" << std::endl;
+				break;
+			case GLFW_KEY_S:
+				if (m_setting_verbose) std::cout << "S pressed" << std::endl;
+				break;
+			case GLFW_KEY_A:
+				if (m_setting_verbose) std::cout << "A pressed" << std::endl;
+				break;
+			case GLFW_KEY_D:
+				if (m_setting_verbose) std::cout << "D pressed" << std::endl;
+				break;
+		}
+	}
+
+	for(int i = 0; i < m_debug_keys.size(); i++)
+	{
+		if (std::get<0>(m_debug_keys.at(i)) == key && action == GLFW_PRESS)
+		{
+			if (m_setting_verbose) std::cout << "debug key " << key << " pressed" << std::endl;
+			std::get<1>(m_debug_keys.at(i));
 		}
 	}
 }

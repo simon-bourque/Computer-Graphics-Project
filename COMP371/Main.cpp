@@ -24,8 +24,9 @@ int main() {
 	InputManager* inputManager = new InputManager(window);
 	inputManager->init();
 	//inputManager->setCamera(Camera* camera);
-	inputManager->registerKey(GLFW_KEY_A , test);
+	inputManager->registerDebugKey(GLFW_KEY_Z , test);
 	inputManager->setVerbose(true);
+	inputManager->setKeyRepeat(true);
 
 	if (!window) {
 		// Failed to load window

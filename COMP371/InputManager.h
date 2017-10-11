@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <tuple>
 
 class InputManager {
 
@@ -14,8 +15,9 @@ public:
 	bool init();
 	void setCamera();//Camera* camera);
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
+	void setKeyRepeat(bool setting) { m_setting_key_repeat = setting; };
 
-	void registerKey(int key, void(*function)());
+	void registerDebugKey(int key, void(*function)());
 
 private:
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -26,11 +28,11 @@ private:
 	GLFWwindow* m_window;
 	glm::vec2 m_mouse_position;
 	//Camera* m_cam;
-	std::vector<int> m_keys;
-	std::vector<void(*)()> m_key_function_ptrs;
+	std::vector < std::tuple<int, void(*)>> m_debug_keys;
 
 	// Settings
 	bool m_setting_verbose;
+	bool m_setting_key_repeat;
 
 	// Wrapper
 	class GLFWCallbackWrapper {
