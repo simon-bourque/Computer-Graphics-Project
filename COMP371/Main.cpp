@@ -1,10 +1,13 @@
+//Standard library
+#include <iostream>
 
+//External includes
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include <iostream>
-
+//Local headers
+#include "ChunkManager.h"
 #include "Types.h"
 
 GLFWwindow* initGLFW();
@@ -12,7 +15,6 @@ void update(float32 deltaSeconds);
 void render();
 
 int main() {
-
 	// Initialize GLFW
 	GLFWwindow* window = initGLFW();
 	if (!window) {
