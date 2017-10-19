@@ -9,10 +9,11 @@
 class InputManager {
 
 public:
-	InputManager(GLFWwindow* window);
+	InputManager();
 	~InputManager();
 
-	bool init();
+	static InputManager* getInstance();
+
 	void setCamera();//Camera* camera);
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
 	void setKeyRepeat(bool setting) { m_setting_key_repeat = setting; };
@@ -23,10 +24,14 @@ public:
 	void registerDebugKey(int key, void(*function)());
 
 private:
+	bool init();
+
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	void mouse_button_callback(GLFWwindow *_window, int button, int action, int mods);
 	void error_callback(int error, const char* description);
+
+	static InputManager* _instance;
 
 	GLFWwindow* m_window;
 	glm::vec2 m_mouse_position;

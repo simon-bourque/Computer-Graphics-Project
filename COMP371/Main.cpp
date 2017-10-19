@@ -21,8 +21,7 @@ int main() {
 	// Initialize GLFW
 	GLFWwindow* window = initGLFW();
 
-	InputManager* inputManager = new InputManager(window);
-	inputManager->init();
+	InputManager* inputManager = InputManager::getInstance();
 	//inputManager->setCamera(Camera* camera);
 	inputManager->registerDebugKey(GLFW_KEY_Z , test);
 	inputManager->setVerbose(true);

@@ -4,10 +4,12 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-InputManager::InputManager(GLFWwindow* window):
+InputManager* InputManager::_instance = 0;
+
+InputManager::InputManager():
 	m_setting_verbose(false)
 {
-	m_window = window;
+	m_window = glfwGetCurrentContext();
 }
 
 InputManager::~InputManager()
@@ -16,6 +18,16 @@ InputManager::~InputManager()
 	glfwSetCursorPosCallback(m_window, NULL);
 	glfwSetMouseButtonCallback(m_window, NULL);
 	glfwSetErrorCallback(NULL);
+}
+
+InputManager* InputManager::getInstance()
+{
+	if (_instance == nullptr)
+	{
+		_instance = new InputManager();
+		_instance->init();
+	}
+	return _instance;
 }
 
 bool InputManager::init()
