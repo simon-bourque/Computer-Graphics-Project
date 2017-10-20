@@ -10,32 +10,55 @@
 #include "ChunkManager.h"
 #include "Types.h"
 
+#include "ShaderCache.h"
+
+#include "Camera.h"
+
+#include "RenderingContext.h"
+
+#include "ModelCache.h"
+#include "Model.h"
+
+#include "TextureCache.h"
+#include "Texture.h"
+
+#include <vector>
+
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
+
+// Test cube, will be removed later
+#include "Primitives.h"
+void initTestCube();
+ShaderProgram* cubeShader = nullptr;
+Model* cubeModel = nullptr;
+Texture* cubeTexture = nullptr;
 
 glm::vec3 playerPosition(-40.0f,0.0f,-70.0f);
 
 int main() {
 
+	GLFWwindow* window = nullptr;
+	try {
+		
+		// Initialize GLFW
+		window = initGLFW();
+
+		RenderingContext::init();
+
+		initTestCube();
+	}
+	catch (std::runtime_error& ex) {
+		std::cout << ex.what() << std::endl;
+		system("pause");
+		return 1;
+	}
+	
 	ChunkManager::instance()->loadChunks(playerPosition);
 
-	// Initialize GLFW
-	GLFWwindow* window = initGLFW();
-	if (!window) {
-		// Failed to load window
-		return 1;
-	}
 
-	// Initialize glew
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << "Error: failed to initialize glew." << std::endl;
-		return 1;
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	RenderingContext::get()->camera.transform.translateLocal(0,0,2);
 
 	// Start loop
 	uint32 frames = 0;
@@ -66,15 +89,17 @@ int main() {
 		}
 	}
 
+	RenderingContext::destroy();
+	
 	glfwTerminate();
+
 
 	return 0;
 }
 
 GLFWwindow* initGLFW() {
 	if (!glfwInit()) {
-		std::cout << "Error: failed to initialize GLFW." << std::endl;
-		return nullptr;
+		throw std::runtime_error("Error: failed to initialize GLFW.");
 	}
 
 	glfwDefaultWindowHints();
@@ -82,9 +107,8 @@ GLFWwindow* initGLFW() {
 	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
 
 	if (!window) {
-		std::cout << "Error: failed to initialize window." << std::endl;
 		glfwTerminate();
-		return nullptr;
+		throw std::runtime_error("Error: failed to initialize window.");
 	}
 
 	glfwMakeContextCurrent(window);
@@ -101,7 +125,29 @@ void update(float32 deltaSeconds) {
 }
 
 void render() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RenderingContext::get()->prepareFrame();
 
 	// Render...
+
+
+	// Render test cube
+	cubeShader->use();
+
+	cubeModel->bind();
+
+	cubeShader->setUniform("mvpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	cubeShader->setUniform("color", glm::vec3(1, 0, 0));
+
+	glDrawElements(GL_TRIANGLES, cubeModel->getCount(), GL_UNSIGNED_INT, nullptr);
+}
+
+void initTestCube() {
+	std::vector<float32> vertices;
+	std::vector<uint32> indices;
+
+	cube::fill(vertices, indices);
+
+	cubeModel = RenderingContext::get()->modelCache.loadModel("cube", vertices, indices);
+	cubeShader = RenderingContext::get()->shaderCache.loadShaderProgram("test_cube", "test_cube_vert.glsl", "test_cube_frag.glsl");
+	cubeTexture = RenderingContext::get()->textureCache.loadTexture2D("test_cube_texture", "test.png");
 }
