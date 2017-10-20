@@ -5,11 +5,13 @@
 //Local headers
 #include "Types.h"
 
-enum class BlockType {
+enum class BlockType
+{
 	GRASS, LOG, LEAVES, DIRT, SAND, SNOW
 };
 
-struct Block {
+struct Block
+{
 	Block(glm::vec3 position, BlockType blockType)
 		: m_position(position)
 		, m_blockType(blockType)

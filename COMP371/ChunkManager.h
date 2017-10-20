@@ -13,8 +13,8 @@
 #include "Types.h"
 #include "Chunk.h"
 
-class ChunkManager {
-
+class ChunkManager
+{
 public:
 	ChunkManager();
 	~ChunkManager();
@@ -26,7 +26,7 @@ public:
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
 	void loadData(std::vector<glm::vec3> data);
-	Chunk retrieveData();
+	glm::vec3 retrieveData();
 
 	//Chunk Loading Routine
 	friend DWORD WINAPI cmRoutine(LPVOID p);
