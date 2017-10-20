@@ -62,6 +62,14 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition) {
 		}
 		decrementor++;
 	}
+	//Check for already loaded chunks
+	for (auto it = chunksToLoad.begin(); it != chunksToLoad.end(); it++) {
+		for (uint32 j = 0; j < cmLoadedChunks.size(); j++) {
+			if (*it == cmLoadedChunks.at(j).getPosition()) {
+				chunksToLoad.erase(it);
+			}
+		}
+	}
 	loadData(chunksToLoad);
 }
 
@@ -81,10 +89,10 @@ void ChunkManager::loadData(std::vector<glm::vec3> data) {
 		NULL
 	);
 }
-glm::vec3 ChunkManager::retrieveData() {
+Chunk ChunkManager::retrieveData() {
 	cmOutMutex.lock();
 
-	glm::vec3 data = cmOutQueue.front();
+	Chunk data = cmOutQueue.front();
 	cmOutQueue.pop();
 
 	cmOutMutex.unlock();
@@ -96,10 +104,12 @@ glm::vec3 ChunkManager::retrieveData() {
 DWORD WINAPI cmRoutine(LPVOID p) {
 	WaitForSingleObject(ChunkManager::sChunkManager->getSemaphoreHandle(), INFINITE);
 
+	ChunkManager::sChunkManager->cmInMutex.lock();
+	//Generate VAOs and VBOs and stuff
+	ChunkManager::sChunkManager->cmInMutex.unlock();
+
 	ChunkManager::sChunkManager->cmOutMutex.lock();
-
-	//Compute stuff
-
+	//Push stuff to output queue
 	ChunkManager::sChunkManager->cmOutMutex.unlock();
 
 	return 0;
