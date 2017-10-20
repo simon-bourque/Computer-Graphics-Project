@@ -1,10 +1,13 @@
+//Standard library
+#include <iostream>
 
+//External includes
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include <iostream>
-
+//Local headers
+#include "ChunkManager.h"
 #include "Types.h"
 
 #include "ShaderCache.h"
@@ -32,6 +35,8 @@ ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
+glm::vec3 playerPosition(-40.0f,0.0f,-70.0f);
+
 int main() {
 
 	GLFWwindow* window = nullptr;
@@ -50,7 +55,7 @@ int main() {
 		return 1;
 	}
 	
-
+	ChunkManager::instance()->loadChunks(playerPosition);
 
 
 	RenderingContext::get()->camera.transform.translateLocal(0,0,2);
