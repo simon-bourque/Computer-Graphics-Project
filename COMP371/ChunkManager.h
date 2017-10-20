@@ -20,7 +20,7 @@ public:
 	~ChunkManager();
 
 	//Getters
-	static ChunkManager* instance() { return sChunkManager; }
+	static ChunkManager* instance();
 	HANDLE getSemaphoreHandle() { return cmSemaphore; }
 
 	//Data Manipulation

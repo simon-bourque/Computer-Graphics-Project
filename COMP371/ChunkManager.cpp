@@ -116,16 +116,16 @@ void ChunkManager::loadData(std::vector<glm::vec3> data)
 	for (uint32_t i = 0; i < data.size(); i++)
 	{
 		cmInQueue.push(data.at(i));
+
+		//Signal semaphore
+		ReleaseSemaphore(
+			cmSemaphore,
+			1,
+			NULL
+		);
 	}
 
 	cmInMutex.unlock();
-
-	//Signal semaphore
-	ReleaseSemaphore(
-		cmSemaphore,
-		1,
-		NULL
-	);
 }
 glm::vec3 ChunkManager::retrieveData()
 {
@@ -151,4 +151,10 @@ ChunkManager::~ChunkManager()
 	delete sChunkManager;
 }
 
-ChunkManager* ChunkManager::sChunkManager;
+ChunkManager* ChunkManager::instance() {
+	if (!sChunkManager)
+		sChunkManager = new ChunkManager;
+	return sChunkManager;
+}
+
+ChunkManager* ChunkManager::sChunkManager = nullptr;
