@@ -132,15 +132,21 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelCache.cpp" />
+    <ClCompile Include="RenderingContext.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
-    <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelCache.h" />
+    <ClInclude Include="RenderingContext.h" />
     <ClInclude Include="ShaderProgram.h" />
-    <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />

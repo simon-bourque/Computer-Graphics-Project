@@ -7,4 +7,6 @@ namespace cube {
 	extern const float32 vertices[];
 	extern const uint32 numIndices;
 	extern const uint32 indices[];
+
+	void fill(std::vector<float32>& vertices, std::vector<uint32>& indices);
 }

@@ -1,5 +1,6 @@
 
 #include "Types.h"
+#include <vector>
 
 namespace cube {
 	extern const uint32 numVertices = 8;
@@ -30,4 +31,14 @@ namespace cube {
 		0,4,7,
 		0,7,3
 	};
+
+	void fill(std::vector<float32>& vertices, std::vector<uint32>& indices) {
+		for (int32 i = 0; i < (numVertices * 3); i++) {
+			vertices.push_back(cube::vertices[i]);
+		}
+
+		for (int32 i = 0; i < numIndices; i++) {
+			indices.push_back(cube::indices[i]);
+		}
+	}
 }

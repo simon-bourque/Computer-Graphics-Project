@@ -7,23 +7,26 @@
 
 #include "Types.h"
 
-#include "ShaderManager.h"
+#include "ShaderCache.h"
 
 #include "Camera.h"
+
+#include "RenderingContext.h"
+
+#include "ModelCache.h"
+#include "Model.h"
+
+#include <vector>
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
 
-Camera camera(45.0f, 16.0f/9.0f);
-
 // Test cube, will be removed later
 #include "Primitives.h"
 void initTestCube();
-GLuint cubeVao = 0;
-GLuint cubeVbo = 0;
-GLuint cubeEbo = 0;
 ShaderProgram* cubeShader = nullptr;
+Model* cubeModel = nullptr;
 
 int main() {
 
@@ -34,22 +37,11 @@ int main() {
 		return 1;
 	}
 
-	// Initialize glew
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << "Error: failed to initialize glew." << std::endl;
-		return 1;
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	RenderingContext::init();
 
 	initTestCube();
 
-	ShaderManager::init();
-	cubeShader = ShaderManager::get()->createShaderProgram("test_cube", "test_cube_vert.glsl", "test_cube_frag.glsl");
-
-	camera.transform.translateLocal(0,0,2);
+	RenderingContext::get()->camera.transform.translateLocal(0,0,2);
 
 	// Start loop
 	uint32 frames = 0;
@@ -82,12 +74,7 @@ int main() {
 
 	glfwTerminate();
 
-
-	ShaderManager::destroy();
-
-	glDeleteBuffers(1, &cubeVbo);
-	glDeleteBuffers(1, &cubeEbo);
-	glDeleteVertexArrays(1, &cubeVao);
+	RenderingContext::destroy();
 
 	return 0;
 }
@@ -122,8 +109,7 @@ void update(float32 deltaSeconds) {
 }
 
 void render() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	camera.updateViewProjectMatrix();
+	RenderingContext::get()->prepareFrame();
 
 	// Render...
 
@@ -131,29 +117,20 @@ void render() {
 	// Render test cube
 	cubeShader->use();
 
-	glBindVertexArray(cubeVao);
+	cubeModel->bind();
 
-	cubeShader->setUniform("mvpMatrix", camera.getViewProjectionMatrix());
+	cubeShader->setUniform("mvpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	cubeShader->setUniform("color", glm::vec3(1, 0, 0));
 
-	glDrawElements(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, cubeModel->getCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 void initTestCube() {
-	glGenVertexArrays(1, &cubeVao);
-	glBindVertexArray(cubeVao);
+	std::vector<float32> vertices;
+	std::vector<uint32> indices;
 
-	glGenBuffers(1, &cubeVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float32) * cube::numVertices * 3, cube::vertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+	cube::fill(vertices, indices);
 
-
-	glGenBuffers(1, &cubeEbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32) * cube::numIndices, cube::indices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	cubeModel = RenderingContext::get()->modelCache.loadModel("cube", vertices, indices);
+	cubeShader = RenderingContext::get()->shaderCache.loadShaderProgram("test_cube", "test_cube_vert.glsl", "test_cube_frag.glsl");
 }

@@ -7,13 +7,15 @@
 #include <string>
 
 class ShaderProgram {
-	friend class ShaderManager;
+	friend class ShaderCache;
 private:
 	GLuint m_shaderHandle;
 
 	ShaderProgram(GLuint shaderHandle);
-public:
 	virtual ~ShaderProgram();
+public:
+	ShaderProgram(const ShaderProgram&) = delete;
+	ShaderProgram& operator=(const ShaderProgram&) = delete;
 
 	void use() const;
 

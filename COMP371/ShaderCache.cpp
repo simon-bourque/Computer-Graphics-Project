@@ -1,15 +1,13 @@
-#include "ShaderManager.h"
+#include "ShaderCache.h"
 
 #include <fstream>
 #include <sstream>
 
 std::string loadShaderText(const std::string& path);
 
-ShaderManager* ShaderManager::s_instance = nullptr;
+ShaderCache::ShaderCache() {}
 
-ShaderManager::ShaderManager() {}
-
-ShaderManager::~ShaderManager() {
+ShaderCache::~ShaderCache() {
 	for (const auto& pair : m_shaders) {
 		glDeleteProgram(pair.second->m_shaderHandle);
 		delete pair.second;
@@ -17,7 +15,7 @@ ShaderManager::~ShaderManager() {
 	m_shaders.clear();
 }
 
-ShaderProgram* ShaderManager::createShaderProgram(const std::string name, std::string vertPath, const std::string fragPath) {
+ShaderProgram* ShaderCache::loadShaderProgram(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	GLint vertShader = glCreateShader(GL_VERTEX_SHADER);
 	GLint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
