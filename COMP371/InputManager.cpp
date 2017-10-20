@@ -40,11 +40,6 @@ bool InputManager::init()
 	return true;
 }
 
-void InputManager::setCamera()//Camera* camera)
-{
-	//m_camera = camera;
-}
-
 /*
 	Had to read https://stackoverflow.com/questions/15128444/c-calling-a-function-from-a-vector-of-function-pointers-inside-a-class-where-t
 */
@@ -54,6 +49,16 @@ void InputManager::registerDebugKey(int key, void(*function)())
 	std::get<0>(t) = key;
 	std::get<1>(t) = function;
 	m_debug_keys.push_back(t);
+}
+
+void InputManager::registerKeyCallback(void(*function)(int, int))
+{
+	m_key_callbacks.push_back(function);
+}
+
+void InputManager::registerMouseBtnCallback(void(*function)(int, int))
+{
+	m_mouse_btn_callbacks.push_back(function);
 }
 
 void InputManager::setCursorInvisible(bool setting)
@@ -68,24 +73,11 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 	{
 		switch (key)
 		{
-			case GLFW_KEY_W:
-				if (m_setting_verbose) std::cout << "W pressed" << std::endl;
-				break;
-			case GLFW_KEY_S:
-				if (m_setting_verbose) std::cout << "S pressed" << std::endl;
-				break;
-			case GLFW_KEY_A:
-				if (m_setting_verbose) std::cout << "A pressed" << std::endl;
-				break;
-			case GLFW_KEY_D:
-				if (m_setting_verbose) std::cout << "D pressed" << std::endl;
-				break;
-
 			case GLFW_KEY_F1:
 				setCursorInvisible(!m_setting_cursor_invisible);
 		}
 	}
-
+	
 	for(int i = 0; i < m_debug_keys.size(); i++)
 	{
 		if (std::get<0>(m_debug_keys.at(i)) == key && action == GLFW_PRESS)
@@ -94,43 +86,22 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 			std::get<1>(m_debug_keys.at(i));
 		}
 	}
+
+	for (auto& it : m_key_callbacks)
+		it(key, action);
 }
+
 
 void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	m_mouse_position = glm::vec2(xpos, ypos);
 	if(m_setting_verbose) std::cout << "Mouse at (" << m_mouse_position.x << "," << m_mouse_position.y << ")" << std::endl;
-
-	// forward xpos and ypos to camera
 }
 
 void InputManager::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	// potentially alter the camera's state if necessary
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-	{
-		if (m_setting_verbose) std::cout << "Left Mouse pressed." << std::endl;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-	{
-		if (m_setting_verbose) std::cout << "Left Mouse released." << std::endl;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
-	{
-		if (m_setting_verbose) std::cout << "Middle Mouse pressed." << std::endl;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
-	{
-		if (m_setting_verbose) std::cout << "Middle Mouse released." << std::endl;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-	{
-		if (m_setting_verbose) std::cout << "Right Mouse pressed." << std::endl;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-	{
-		if (m_setting_verbose) std::cout << "Right Mouse released." << std::endl;
-	}
+	for (auto& it : m_mouse_btn_callbacks)
+		it(button, action);
 }
 
 void InputManager::error_callback(int error, const char* description)
@@ -138,12 +109,9 @@ void InputManager::error_callback(int error, const char* description)
 	fputs(description, stderr);
 }
 
-
-// Wrapper
 /*
 	Idea is from https://stackoverflow.com/questions/7676971/pointing-to-a-function-that-is-a-class-member-glfw-setkeycallback
 */
-
 void InputManager::GLFWCallbackWrapper::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	s_input_manager->key_callback(window, key, scancode, action, mods);

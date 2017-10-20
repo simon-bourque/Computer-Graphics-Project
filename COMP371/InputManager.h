@@ -9,21 +9,22 @@
 class InputManager {
 
 public:
-	InputManager();
-	~InputManager();
-
 	static InputManager* getInstance();
 
-	void setCamera();//Camera* camera);
+	void registerDebugKey(int key, void(*function)());
+	void registerKeyCallback(void(*function)(int, int));
+	void registerMouseBtnCallback(void(*function)(int, int));
+
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
 	void setKeyRepeat(bool setting) { m_setting_key_repeat = setting; };
 	void setCursorInvisible(bool setting);
 
 	glm::vec2 getMousePosition() { return m_mouse_position; };
 
-	void registerDebugKey(int key, void(*function)());
-
 private:
+	InputManager();
+	~InputManager();
+
 	bool init();
 
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -35,8 +36,10 @@ private:
 
 	GLFWwindow* m_window;
 	glm::vec2 m_mouse_position;
-	//Camera* m_cam;
-	std::vector < std::tuple<int, void(*)>> m_debug_keys;
+
+	std::vector <std::tuple<int, void(*)>> m_debug_keys;
+	std::vector<void(*)(int, int)> m_key_callbacks;
+	std::vector<void(*)(int, int)> m_mouse_btn_callbacks;
 
 	// Settings
 	bool m_setting_verbose;

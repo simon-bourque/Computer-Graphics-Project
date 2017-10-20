@@ -16,14 +16,19 @@ void test() {
 	std::cout << "test" << std::endl;
 }
 
+void test2(int key, int action) {
+	std::cout << "test2 " << key << " " << action << std::endl;
+}
+
 int main() {
 
 	// Initialize GLFW
 	GLFWwindow* window = initGLFW();
 
 	InputManager* inputManager = InputManager::getInstance();
-	//inputManager->setCamera(Camera* camera);
 	inputManager->registerDebugKey(GLFW_KEY_Z , test);
+	inputManager->registerKeyCallback(test2);
+	inputManager->registerMouseBtnCallback(test2);
 	inputManager->setVerbose(true);
 	inputManager->setKeyRepeat(true);
 
