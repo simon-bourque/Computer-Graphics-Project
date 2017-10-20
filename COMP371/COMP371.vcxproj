@@ -138,6 +138,8 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +150,8 @@
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>

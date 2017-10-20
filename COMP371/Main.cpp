@@ -16,6 +16,9 @@
 #include "ModelCache.h"
 #include "Model.h"
 
+#include "TextureCache.h"
+#include "Texture.h"
+
 #include <vector>
 
 GLFWwindow* initGLFW();
@@ -27,19 +30,28 @@ void render();
 void initTestCube();
 ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
+Texture* cubeTexture = nullptr;
 
 int main() {
 
-	// Initialize GLFW
-	GLFWwindow* window = initGLFW();
-	if (!window) {
-		// Failed to load window
+	GLFWwindow* window = nullptr;
+	try {
+		
+		// Initialize GLFW
+		window = initGLFW();
+
+		RenderingContext::init();
+
+		initTestCube();
+	}
+	catch (std::runtime_error& ex) {
+		std::cout << ex.what() << std::endl;
+		system("pause");
 		return 1;
 	}
+	
 
-	RenderingContext::init();
 
-	initTestCube();
 
 	RenderingContext::get()->camera.transform.translateLocal(0,0,2);
 
@@ -72,17 +84,17 @@ int main() {
 		}
 	}
 
+	RenderingContext::destroy();
+	
 	glfwTerminate();
 
-	RenderingContext::destroy();
 
 	return 0;
 }
 
 GLFWwindow* initGLFW() {
 	if (!glfwInit()) {
-		std::cout << "Error: failed to initialize GLFW." << std::endl;
-		return nullptr;
+		throw std::runtime_error("Error: failed to initialize GLFW.");
 	}
 
 	glfwDefaultWindowHints();
@@ -90,9 +102,8 @@ GLFWwindow* initGLFW() {
 	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
 
 	if (!window) {
-		std::cout << "Error: failed to initialize window." << std::endl;
 		glfwTerminate();
-		return nullptr;
+		throw std::runtime_error("Error: failed to initialize window.");
 	}
 
 	glfwMakeContextCurrent(window);
@@ -133,4 +144,5 @@ void initTestCube() {
 
 	cubeModel = RenderingContext::get()->modelCache.loadModel("cube", vertices, indices);
 	cubeShader = RenderingContext::get()->shaderCache.loadShaderProgram("test_cube", "test_cube_vert.glsl", "test_cube_frag.glsl");
+	cubeTexture = RenderingContext::get()->textureCache.loadTexture2D("test_cube_texture", "test.png");
 }

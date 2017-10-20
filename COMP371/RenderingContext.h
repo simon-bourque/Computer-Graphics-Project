@@ -2,6 +2,7 @@
 
 #include "ShaderCache.h"
 #include "ModelCache.h"
+#include "TextureCache.h"
 
 #include "Camera.h"
 
@@ -13,6 +14,7 @@ public:
 
 	ShaderCache shaderCache;
 	ModelCache modelCache;
+	TextureCache textureCache;
 private: // Member functions
 	RenderingContext();
 	virtual ~RenderingContext();
