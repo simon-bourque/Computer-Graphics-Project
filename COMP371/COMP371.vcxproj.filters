@@ -50,6 +50,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextureCache.cpp">
+	      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ChunkManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
