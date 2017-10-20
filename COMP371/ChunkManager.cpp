@@ -1,5 +1,7 @@
 #include "ChunkManager.h"
 
+#include <math.h>
+
 ChunkManager::ChunkManager() {
 	cmSemaphore = CreateSemaphore(
 		NULL,	//Default security attributes
@@ -27,8 +29,8 @@ ChunkManager::ChunkManager() {
 
 void ChunkManager::loadChunks(glm::vec3 playerPosition) {
 	//Coordinates pointers to make the algorithm easier. Casting them to integer to get the coordinate of the chunk the player is standing in
-	int32 currentX = playerPosition.x / CHUNKWIDTH;
-	int32 currentZ = playerPosition.z / CHUNKWIDTH;
+	float32 currentX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 currentZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
 
 	//Vector of chunks to then send to the input queue
 	std::vector<glm::vec3> chunksToLoad;
@@ -60,6 +62,7 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition) {
 		}
 		decrementor++;
 	}
+	loadData(chunksToLoad);
 }
 
 void ChunkManager::loadData(std::vector<glm::vec3> data) {

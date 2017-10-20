@@ -14,7 +14,7 @@ GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
 
-glm::vec3 playerPosition(0.0f);
+glm::vec3 playerPosition(-40.0f,0.0f,-70.0f);
 
 int main() {
 
