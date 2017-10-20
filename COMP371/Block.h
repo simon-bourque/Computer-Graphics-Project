@@ -6,7 +6,7 @@
 #include "Types.h"
 
 enum class BlockType {
-	GRASS, LOG, LEAVES, DIRT
+	GRASS, LOG, LEAVES, DIRT, SAND, SNOW
 };
 
 struct Block {
