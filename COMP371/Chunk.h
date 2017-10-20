@@ -8,18 +8,21 @@
 //Local headers
 #include "Types.h"
 
-struct Chunk {
+struct Chunk
+{
 	//Constructor
-	Chunk(glm::vec3 position, uint32 VAO, std::vector<uint32> VBOs)
+	Chunk(glm::vec3 position)
 		: m_position(position)
-		, m_VAO(VAO)
-		, m_VBOs(VBOs)
 	{}
 
 	//Getters
 	glm::vec3 getPosition() { return m_position; }
 	uint32 getVao() { return m_VAO; }
 	std::vector<uint32> getVbos() { return m_VBOs; }
+
+	//Setters
+	void setVao(uint32 VAO) { m_VAO = VAO; }
+	void setVbos(std::vector<uint32> VBOs) { m_VBOs = VBOs; }
 
 private:
 	//OpenGL Buffers
