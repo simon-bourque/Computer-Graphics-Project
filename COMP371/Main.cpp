@@ -14,7 +14,12 @@ GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
 
+glm::vec3 playerPosition(0.0f);
+
 int main() {
+
+	ChunkManager::instance()->loadChunks(playerPosition);
+
 	// Initialize GLFW
 	GLFWwindow* window = initGLFW();
 	if (!window) {

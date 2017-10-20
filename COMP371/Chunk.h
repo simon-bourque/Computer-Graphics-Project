@@ -2,18 +2,30 @@
 //Standard Library
 #include <vector>
 
+//External includes
+#include "glm\glm.hpp"
+
 //Local headers
 #include "Types.h"
-#include "Block.h"
 
 struct Chunk {
-	//Local position of the chunk in the world. Equivalent to the position of the first block of the chunk
-	//At the bottom, on top left.
-	float32 xPos;
-	float32 yPos;
-	float32 zPos;
+	//Constructor
+	Chunk(glm::vec3 position, uint32 VAO, std::vector<uint32> VBOs)
+		: m_position(position)
+		, m_VAO(VAO)
+		, m_VBOs(VBOs)
+	{}
 
+	//Getters
+	glm::vec3 getPosition() { return m_position; }
+	uint32 getVao() { return m_VAO; }
+	std::vector<uint32> getVbos() { return m_VBOs; }
+
+private:
 	//OpenGL Buffers
-	uint32 VAO;					//VAO handle for all the VBOs (blocks) in the chunk
-	std::vector<uint32> VBOs; 	//Vector of all block data
+	uint32 m_VAO;					//VAO handle for all the VBOs (blocks) in the chunk
+	std::vector<uint32> m_VBOs; 	//Vector of all block data
+
+	//World coordinate of the chunk (center).
+	glm::vec3 m_position;
 };

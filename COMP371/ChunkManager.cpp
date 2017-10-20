@@ -25,6 +25,43 @@ ChunkManager::ChunkManager() {
 	}
 }
 
+void ChunkManager::loadChunks(glm::vec3 playerPosition) {
+	//Coordinates pointers to make the algorithm easier. Casting them to integer to get the coordinate of the chunk the player is standing in
+	int32 currentX = playerPosition.x / CHUNKWIDTH;
+	int32 currentZ = playerPosition.z / CHUNKWIDTH;
+
+	//Vector of chunks to then send to the input queue
+	std::vector<glm::vec3> chunksToLoad;
+	//Used to create the circular shape
+	uint32 decrementor = 0;
+
+	//Chunk on player
+	chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+	//Middle pass
+	currentX = playerPosition.x, currentZ = playerPosition.z;
+	for (uint32 i = 1; i <= LOADINGRADIUS; i++) {
+		currentZ = i*CHUNKWIDTH;
+		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+		chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
+	}
+	//Top pass
+	currentX = playerPosition.x;
+	for (uint32 i = 1; i <= LOADINGRADIUS; i++) {
+		currentZ = playerPosition.z;
+		currentX = playerPosition.x + i*CHUNKWIDTH;
+		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+		chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
+		for (uint32 k = 1; k < LOADINGRADIUS - decrementor; k++) {
+			currentZ = playerPosition.z + k*CHUNKWIDTH;
+			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+			chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
+			chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
+			chunksToLoad.push_back(glm::vec3(-currentX, 0, -currentZ));
+		}
+		decrementor++;
+	}
+}
+
 void ChunkManager::loadData(std::vector<glm::vec3> data) {
 	cmInMutex.lock();
 
@@ -52,11 +89,6 @@ glm::vec3 ChunkManager::retrieveData() {
 	return data;
 }
 
-//Getters
-HANDLE ChunkManager::getSemaphoreHandle() {
-	return cmSemaphore;
-}
-
 //Chunk Loading Thread Routine
 DWORD WINAPI cmRoutine(LPVOID p) {
 	WaitForSingleObject(ChunkManager::sChunkManager->getSemaphoreHandle(), INFINITE);
@@ -76,6 +108,8 @@ ChunkManager::~ChunkManager() {
 	for (uint32_t i = 0; i < THREADCOUNT; i++) {
 		CloseHandle(cmThreadH[i]);
 	}
+
+	delete sChunkManager;
 }
 
 ChunkManager* ChunkManager::sChunkManager;

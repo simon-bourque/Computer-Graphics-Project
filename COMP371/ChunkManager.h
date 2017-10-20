@@ -11,6 +11,7 @@
 
 //Local headers
 #include "Types.h"
+#include "Chunk.h"
 
 class ChunkManager {
 
@@ -19,9 +20,11 @@ public:
 	~ChunkManager();
 
 	//Getters
-	HANDLE getSemaphoreHandle();
+	static ChunkManager* instance() { return sChunkManager; }
+	HANDLE getSemaphoreHandle() { return cmSemaphore; }
 
 	//Data Manipulation
+	void loadChunks(glm::vec3 playerPosition);
 	void loadData(std::vector<glm::vec3> data);
 	glm::vec3 retrieveData();
 
@@ -30,9 +33,8 @@ public:
 
 	//Chunk Dimensions
 	static const uint32 CHUNKWIDTH = 32;
-	static const uint32 CHUNKLENGTH = 32;
 	static const uint32 CHUNKHEIGHT = 256;
-	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKLENGTH*CHUNKHEIGHT;
+	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
 private:
 	//Multi-Threading Variables
@@ -43,6 +45,10 @@ private:
 	HANDLE cmSemaphore;
 	std::mutex cmInMutex;
 	std::mutex cmOutMutex;
+
+	//Loaded chunks
+	static const uint32 LOADINGRADIUS = 4;
+	std::vector<Chunk> cmLoadedChunks;
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;
