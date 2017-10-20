@@ -26,7 +26,7 @@ public:
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
 	void loadData(std::vector<glm::vec3> data);
-	glm::vec3 retrieveData();
+	Chunk retrieveData();
 
 	//Chunk Loading Routine
 	friend DWORD WINAPI cmRoutine(LPVOID p);
@@ -52,7 +52,7 @@ private:
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;
-	std::queue<glm::vec3> cmOutQueue;
+	std::queue<Chunk> cmOutQueue;
 
 	//ChunkManager singleton
 	static ChunkManager* sChunkManager;
