@@ -2,7 +2,6 @@
 
 #include "FastNoise/FastNoise.h"
 #include "Chunk.h"
-#include "ChunkManager.h"
 #include "Block.h"
 
 #include <vector>

@@ -12,14 +12,15 @@ enum class BlockType
 
 struct Block
 {
+	Block(){}
 	Block(glm::vec3 position, BlockType blockType)
 		: m_position(position)
 		, m_blockType(blockType)
 	{}
 
 	//Getters
-	glm::vec3 getPosition() { return m_position; }
-	BlockType getBlockType() { return m_blockType; }
+	glm::vec3 getPosition() const { return m_position; }
+	BlockType getBlockType() const { return m_blockType; }
 
 private:
 	//Local position of the block in its chunk

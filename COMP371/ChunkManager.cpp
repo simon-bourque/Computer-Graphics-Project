@@ -2,8 +2,10 @@
 
 #include <math.h>
 
-ChunkManager::ChunkManager() 
+ChunkManager::ChunkManager()
+	:cmTerrainBuilder(ChunkManager::SEED)
 {
+
 	cmSemaphore = CreateSemaphore(
 		NULL,	//Default security attributes
 		0,		//Initial count
@@ -33,19 +35,17 @@ ChunkManager::ChunkManager()
 //Chunk Loading Thread Routine
 DWORD WINAPI cmRoutine(LPVOID p)
 {
-	WaitForSingleObject(ChunkManager::sChunkManager->getSemaphoreHandle(), INFINITE);
-
-	uint32 queueSize = ChunkManager::sChunkManager->cmInQueue.size();
-	for (uint32 i = 0; i < queueSize; i++)
+	for(;;)
 	{
-		Chunk tempChunk = Chunk(ChunkManager::sChunkManager->retrieveData());
-		//Generate VAOs and VBOs and stuff
+		WaitForSingleObject(ChunkManager::sChunkManager->getSemaphoreHandle(), INFINITE);
+		uint32 queueSize = ChunkManager::sChunkManager->cmInQueue.size();
+		for (uint32 i = 0; i < queueSize; i++)
+		{
+			Chunk tempChunk = Chunk(ChunkManager::sChunkManager->fetchQueueIn());
+			std::vector<Block> newBlocks = ChunkManager::sChunkManager->cmTerrainBuilder.getChunkBlocks(tempChunk);
+			ChunkManager::sChunkManager->pushQueueOut(newBlocks);
+		}
 	}
-
-	ChunkManager::sChunkManager->cmOutMutex.lock();
-	//Push stuff to output queue
-	ChunkManager::sChunkManager->cmOutMutex.unlock();
-
 	return 0;
 }
 
@@ -106,10 +106,10 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition)
 			}
 		}
 	}
-	loadData(chunksToLoad);
+	pushQueueIn(chunksToLoad);
 }
 
-void ChunkManager::loadData(std::vector<glm::vec3> data)
+void ChunkManager::pushQueueIn(std::vector<glm::vec3> data)
 {
 	cmInMutex.lock();
 
@@ -127,7 +127,20 @@ void ChunkManager::loadData(std::vector<glm::vec3> data)
 
 	cmInMutex.unlock();
 }
-glm::vec3 ChunkManager::retrieveData()
+void ChunkManager::pushQueueOut(std::vector<Block> data)
+{
+	cmOutMutex.lock();
+	cmOutQueue.push(data);
+
+	//Signal semaphore
+	ReleaseSemaphore(
+		cmSemaphore,
+		1,
+		NULL
+	);
+	cmOutMutex.unlock();
+}
+glm::vec3 ChunkManager::fetchQueueIn()
 {
 	cmInMutex.lock();
 
@@ -137,6 +150,22 @@ glm::vec3 ChunkManager::retrieveData()
 	cmInMutex.unlock();
 
 	return data;
+}
+std::vector<Block> ChunkManager::fetchQueueOut() 
+{
+	cmOutMutex.lock();
+	std::vector<Block> data = cmOutQueue.front();
+	cmOutQueue.pop();
+
+	cmOutMutex.unlock();
+
+	return data;
+}
+
+ChunkManager* ChunkManager::instance() {
+	if (!sChunkManager)
+		sChunkManager = new ChunkManager;
+	return sChunkManager;
 }
 
 ChunkManager::~ChunkManager()
@@ -149,12 +178,6 @@ ChunkManager::~ChunkManager()
 	}
 
 	delete sChunkManager;
-}
-
-ChunkManager* ChunkManager::instance() {
-	if (!sChunkManager)
-		sChunkManager = new ChunkManager;
-	return sChunkManager;
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;

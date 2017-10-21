@@ -10,7 +10,9 @@
 #include "glm\glm.hpp"
 
 //Local headers
+#include "TerrainBuilder.h"
 #include "Types.h"
+#include "Block.h"
 #include "Chunk.h"
 
 class ChunkManager
@@ -21,12 +23,14 @@ public:
 
 	//Getters
 	static ChunkManager* instance();
-	HANDLE getSemaphoreHandle() { return cmSemaphore; }
+	HANDLE getSemaphoreHandle() const { return cmSemaphore; }
 
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
-	void loadData(std::vector<glm::vec3> data);
-	glm::vec3 retrieveData();
+	void pushQueueIn(std::vector<glm::vec3> data);
+	void pushQueueOut(std::vector<Block> data);
+	glm::vec3 fetchQueueIn();
+	std::vector<Block> fetchQueueOut();
 
 	//Chunk Loading Routine
 	friend DWORD WINAPI cmRoutine(LPVOID p);
@@ -37,6 +41,9 @@ public:
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
 private:
+	static const uint32 SEED = 666;
+	TerrainBuilder cmTerrainBuilder;
+
 	//Multi-Threading Variables
 	static const uint32 THREADCOUNT = 4;
 	HANDLE cmThreadH [THREADCOUNT];
@@ -52,7 +59,7 @@ private:
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;
-	std::queue<Chunk> cmOutQueue;
+	std::queue<std::vector<Block>> cmOutQueue;
 
 	//ChunkManager singleton
 	static ChunkManager* sChunkManager;

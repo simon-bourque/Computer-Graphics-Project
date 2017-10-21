@@ -1,5 +1,5 @@
 #include "TerrainBuilder.h"
-
+#include "ChunkManager.h"
 
 TerrainBuilder::TerrainBuilder(int seed)
 {

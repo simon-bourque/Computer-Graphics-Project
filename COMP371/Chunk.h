@@ -16,9 +16,9 @@ struct Chunk
 	{}
 
 	//Getters
-	glm::vec3 getPosition() { return m_position; }
-	uint32 getVao() { return m_VAO; }
-	std::vector<uint32> getVbos() { return m_VBOs; }
+	glm::vec3 getPosition() const { return m_position; }
+	uint32 getVao() const { return m_VAO; }
+	std::vector<uint32> getVbos() const { return m_VBOs; }
 
 	//Setters
 	void setVao(uint32 VAO) { m_VAO = VAO; }
