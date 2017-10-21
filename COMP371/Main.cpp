@@ -35,7 +35,9 @@ ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
-glm::vec3 playerPosition(-40.0f,0.0f,-70.0f);
+glm::vec3 playerPosition(0.0f,0.0f,0.0f);
+
+ShaderProgram* chunkShader = nullptr;
 
 int main() {
 
@@ -46,6 +48,7 @@ int main() {
 		window = initGLFW();
 
 		RenderingContext::init();
+		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
 
 		initTestCube();
 	}
@@ -58,7 +61,8 @@ int main() {
 	ChunkManager::instance()->loadChunks(playerPosition);
 
 
-	RenderingContext::get()->camera.transform.translateLocal(0,0,2);
+	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
+	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Start loop
 	uint32 frames = 0;
@@ -122,13 +126,22 @@ GLFWwindow* initGLFW() {
 
 void update(float32 deltaSeconds) {
 	// Update logic...
+	ChunkManager::instance()->uploadQueuedChunk();
 }
 
 void render() {
 	RenderingContext::get()->prepareFrame();
 
-	// Render...
+	// Render chunks
+	chunkShader->use();
+	const std::vector<Chunk> chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	for (const Chunk& chunk : chunks) {
+		glBindVertexArray(chunk.getVao());
 
+		chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.getBlockCount());
+	}
 
 	// Render test cube
 	cubeShader->use();

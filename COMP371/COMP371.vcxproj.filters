@@ -50,7 +50,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextureCache.cpp">
-	      <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ChunkManager.cpp">
       <Filter>Source Files</Filter>
@@ -111,6 +111,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="test_cube_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="chunk_vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="chunk_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

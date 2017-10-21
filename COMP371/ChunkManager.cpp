@@ -2,6 +2,9 @@
 
 #include <math.h>
 
+#include <GL/glew.h>
+#include "Primitives.h"
+
 ChunkManager::ChunkManager()
 	:cmTerrainBuilder(ChunkManager::SEED)
 {
@@ -9,7 +12,7 @@ ChunkManager::ChunkManager()
 	cmSemaphore = CreateSemaphore(
 		NULL,	//Default security attributes
 		0,		//Initial count
-		4,		//Maximum count
+		9999,		//Maximum count
 		NULL	//Unnamed semaphore
 	);
 
@@ -38,13 +41,9 @@ DWORD WINAPI cmRoutine(LPVOID p)
 	for(;;)
 	{
 		WaitForSingleObject(ChunkManager::sChunkManager->getSemaphoreHandle(), INFINITE);
-		uint32 queueSize = ChunkManager::sChunkManager->cmInQueue.size();
-		for (uint32 i = 0; i < queueSize; i++)
-		{
-			Chunk tempChunk = Chunk(ChunkManager::sChunkManager->fetchQueueIn());
-			std::vector<Block> newBlocks = ChunkManager::sChunkManager->cmTerrainBuilder.getChunkBlocks(tempChunk);
-			ChunkManager::sChunkManager->pushQueueOut(newBlocks);
-		}
+		Chunk tempChunk = Chunk(ChunkManager::sChunkManager->fetchQueueIn());
+		std::vector<Block> newBlocks = ChunkManager::sChunkManager->cmTerrainBuilder.getChunkBlocks(tempChunk);
+		ChunkManager::sChunkManager->pushQueueOut(tempChunk.getPosition(), newBlocks);
 	}
 	return 0;
 }
@@ -127,17 +126,12 @@ void ChunkManager::pushQueueIn(std::vector<glm::vec3> data)
 
 	cmInMutex.unlock();
 }
-void ChunkManager::pushQueueOut(std::vector<Block> data)
+void ChunkManager::pushQueueOut(const glm::vec3 chunkPosition, std::vector<Block>& data)
 {
 	cmOutMutex.lock();
-	cmOutQueue.push(data);
+	
+	cmOutQueue.push(std::pair<glm::vec3, std::vector<Block>>(chunkPosition, data));
 
-	//Signal semaphore
-	ReleaseSemaphore(
-		cmSemaphore,
-		1,
-		NULL
-	);
 	cmOutMutex.unlock();
 }
 glm::vec3 ChunkManager::fetchQueueIn()
@@ -151,15 +145,21 @@ glm::vec3 ChunkManager::fetchQueueIn()
 
 	return data;
 }
-std::vector<Block> ChunkManager::fetchQueueOut() 
+
+void ChunkManager::uploadQueuedChunk()
 {
 	cmOutMutex.lock();
-	std::vector<Block> data = cmOutQueue.front();
-	cmOutQueue.pop();
+	
+	if (cmOutQueue.empty()) {
+		cmOutMutex.unlock();
+		return;
+	}
 
+	const auto data = cmOutQueue.front();
+	cmOutQueue.pop();
 	cmOutMutex.unlock();
 
-	return data;
+	uploadChunk(data.first, data.second);
 }
 
 ChunkManager* ChunkManager::instance() {
@@ -178,6 +178,77 @@ ChunkManager::~ChunkManager()
 	}
 
 	delete sChunkManager;
+}
+
+void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector<Block>& chunkData) {
+	GLuint chunkVao;
+	glGenVertexArrays(1, &chunkVao);
+	glBindVertexArray(chunkVao);
+
+	std::vector<float32> vertices;
+	std::vector<uint32> indices;
+	std::vector<GLuint> vbos;
+
+	cube::fill(vertices, indices);
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float32) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+	vbos.push_back(vbo);
+
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32) * indices.size(), indices.data(), GL_STATIC_DRAW);
+	vbos.push_back(ebo);
+
+	GLuint positionBuffer;
+	GLuint textureIndexBuffer;
+	glGenBuffers(1, &positionBuffer);
+	glGenBuffers(1, &textureIndexBuffer);
+
+	float32* positions = new float32[chunkData.size() * 3];
+	uint32* textureIndices = new uint32[chunkData.size()];
+
+	for (int32 i = 0; i < chunkData.size(); i++) {
+		glm::vec3 pos = chunkData[i].getPosition();
+		uint32 type = static_cast<uint32>(chunkData[i].getBlockType());
+
+		positions[(i * 3)] = pos.x;
+		positions[(i * 3) + 1] = pos.y;
+		positions[(i * 3) + 2] = pos.z;
+		textureIndices[i] = type;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float32) * chunkData.size() * 3, positions, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, false, 0, nullptr);
+	glVertexAttribDivisor(3, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, textureIndexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uint32) * chunkData.size(), textureIndices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 1, GL_UNSIGNED_INT, false, 0, nullptr);
+	glVertexAttribDivisor(4, 1);
+
+	vbos.push_back(positionBuffer);
+	vbos.push_back(textureIndexBuffer);
+
+	delete[] positions;
+	delete[] textureIndices;
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	Chunk chunky(chunkPosition);
+	chunky.setVao(chunkVao);
+	chunky.setVbos(vbos);
+	chunky.setBlockCount(chunkData.size());
+	cmLoadedChunks.push_back(chunky);
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;

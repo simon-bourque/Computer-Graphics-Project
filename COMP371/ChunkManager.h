@@ -15,6 +15,8 @@
 #include "Block.h"
 #include "Chunk.h"
 
+#include "Block.h"
+
 class ChunkManager
 {
 public:
@@ -28,9 +30,9 @@ public:
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
 	void pushQueueIn(std::vector<glm::vec3> data);
-	void pushQueueOut(std::vector<Block> data);
+	void pushQueueOut(const glm::vec3 chunkPosition, std::vector<Block>& data);
 	glm::vec3 fetchQueueIn();
-	std::vector<Block> fetchQueueOut();
+	void uploadQueuedChunk();
 
 	//Chunk Loading Routine
 	friend DWORD WINAPI cmRoutine(LPVOID p);
@@ -39,6 +41,8 @@ public:
 	static const uint32 CHUNKWIDTH = 32;
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
+
+	const std::vector<Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
 
 private:
 	static const uint32 SEED = 666;
@@ -59,9 +63,11 @@ private:
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;
-	std::queue<std::vector<Block>> cmOutQueue;
+	std::queue<std::pair<glm::vec3, std::vector<Block>>> cmOutQueue;
 
 	//ChunkManager singleton
 	static ChunkManager* sChunkManager;
+
+	void uploadChunk(const glm::vec3& chunkPosition, const std::vector<Block>& chunkData);
 };
 

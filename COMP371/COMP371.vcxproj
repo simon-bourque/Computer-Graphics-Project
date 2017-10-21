@@ -162,6 +162,8 @@
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="chunk_frag.glsl" />
+    <None Include="chunk_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
     <None Include="test_cube_vert.glsl" />
   </ItemGroup>

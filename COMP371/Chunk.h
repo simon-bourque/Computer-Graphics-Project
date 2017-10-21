@@ -19,10 +19,12 @@ struct Chunk
 	glm::vec3 getPosition() const { return m_position; }
 	uint32 getVao() const { return m_VAO; }
 	std::vector<uint32> getVbos() const { return m_VBOs; }
+	uint32 getBlockCount() const { return m_blockCount; };
 
 	//Setters
 	void setVao(uint32 VAO) { m_VAO = VAO; }
-	void setVbos(std::vector<uint32> VBOs) { m_VBOs = VBOs; }
+	void setVbos(const std::vector<uint32>& VBOs) { m_VBOs = VBOs; }
+	void setBlockCount(uint32 blockCount) { m_blockCount = blockCount; };
 
 private:
 	//OpenGL Buffers
@@ -31,4 +33,6 @@ private:
 
 	//World coordinate of the chunk (center).
 	glm::vec3 m_position;
+
+	uint32 m_blockCount;
 };
