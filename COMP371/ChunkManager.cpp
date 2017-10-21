@@ -9,12 +9,11 @@
 ChunkManager::ChunkManager()
 	:cmTerrainBuilder(ChunkManager::SEED)
 {
-
 	cmSemaphore = CreateSemaphore(
-		NULL,	//Default security attributes
-		0,		//Initial count
-		9999,		//Maximum count
-		NULL	//Unnamed semaphore
+		NULL,
+		0,
+		9999,
+		NULL
 	);
 
 	for (uint32 i = 0; i < THREADCOUNT; i++)
@@ -61,29 +60,37 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition)
 	//Chunk on player
 	chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 	//Middle pass
-	currentX = flooredX, currentZ = flooredZ;
 	for (uint32 i = 1; i <= LOADINGRADIUS; i++)
 	{
-		currentZ = i*CHUNKWIDTH;
+		currentZ = flooredZ + i*CHUNKWIDTH;
 		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
-		chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
+		currentZ = flooredZ - i*CHUNKWIDTH;
+		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 	}
 	//Outer pass
 	for (uint32 i = 1; i <= LOADINGRADIUS; i++) 
 	{
-		currentZ = flooredZ;
 		currentX = flooredX + i*CHUNKWIDTH;
+		currentZ = flooredZ;
 		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
-		chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
+		currentX = flooredX - i*CHUNKWIDTH;
+		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		for (uint32 k = 1; k < LOADINGRADIUS - decrementor; k++) 
 		{
 			currentZ = flooredZ + k*CHUNKWIDTH;
 			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
-			chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
-			chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
-			chunksToLoad.push_back(glm::vec3(-currentX, 0, -currentZ));
+			currentX = flooredX + i*CHUNKWIDTH;
+			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+			currentZ = flooredZ - k*CHUNKWIDTH;
+			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+			currentX = flooredX - i*CHUNKWIDTH;
+			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		}
 		decrementor++;
+	}
+
+	if (chunksToLoad.size() < 41) {
+		std::cout << chunksToLoad.size() << std::endl;
 	}
 
 	//Check for loading chunks
@@ -112,7 +119,6 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition)
 			}
 		}
 	}
-	std::cout << chunksToLoad.size() << std::endl;
 	pushQueueIn(chunksToLoad);
 }
 
@@ -172,7 +178,8 @@ void ChunkManager::uploadQueuedChunk()
 	uploadChunk(data.first, data.second);
 }
 
-ChunkManager* ChunkManager::instance() {
+ChunkManager* ChunkManager::instance() 
+{
 	if (!sChunkManager)
 		sChunkManager = new ChunkManager;
 	return sChunkManager;
