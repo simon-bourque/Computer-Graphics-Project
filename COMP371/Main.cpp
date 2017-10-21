@@ -149,11 +149,11 @@ void render() {
 
 	// Render chunks
 	chunkShader->use();
+	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	const std::vector<Chunk> chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
 	for (const Chunk& chunk : chunks) {
 		glBindVertexArray(chunk.getVao());
 
-		chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.getBlockCount());
 	}
