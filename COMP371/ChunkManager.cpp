@@ -1,6 +1,7 @@
 #include "ChunkManager.h"
 
 #include <math.h>
+#include <iostream>
 
 #include <GL/glew.h>
 #include "Primitives.h"
@@ -51,32 +52,32 @@ DWORD WINAPI cmRoutine(LPVOID p)
 void ChunkManager::loadChunks(glm::vec3 playerPosition) 
 {
 	//Coordinates pointers to make the algorithm easier. Casting them to integer to get the coordinate of the chunk the player is standing in
-	float32 currentX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
-	float32 currentZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 currentX = flooredX, currentZ = flooredZ;
 	std::vector<glm::vec3> chunksToLoad;
 	uint32 decrementor = 0;
 
 	//Chunk on player
 	chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 	//Middle pass
-	currentX = playerPosition.x, currentZ = playerPosition.z;
+	currentX = flooredX, currentZ = flooredZ;
 	for (uint32 i = 1; i <= LOADINGRADIUS; i++)
 	{
 		currentZ = i*CHUNKWIDTH;
 		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
 	}
-	//Top pass
-	currentX = playerPosition.x;
+	//Outer pass
 	for (uint32 i = 1; i <= LOADINGRADIUS; i++) 
 	{
-		currentZ = playerPosition.z;
-		currentX = playerPosition.x + i*CHUNKWIDTH;
+		currentZ = flooredZ;
+		currentX = flooredX + i*CHUNKWIDTH;
 		chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
 		for (uint32 k = 1; k < LOADINGRADIUS - decrementor; k++) 
 		{
-			currentZ = playerPosition.z + k*CHUNKWIDTH;
+			currentZ = flooredZ + k*CHUNKWIDTH;
 			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 			chunksToLoad.push_back(glm::vec3(-currentX, 0, currentZ));
 			chunksToLoad.push_back(glm::vec3(currentX, 0, -currentZ));
@@ -84,27 +85,34 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition)
 		}
 		decrementor++;
 	}
-	//Check for already loaded chunks and unload chunks if they are not going to be rendered
-	for (auto it = chunksToLoad.begin(); it != chunksToLoad.end(); it++) 
+
+	//Check for loading chunks
+	for(int32 i = chunksToLoad.size()-1; i >= 0; i--)
 	{
-		for (uint32 j = 0; j < cmLoadedChunks.size(); j++) 
+		if (cmLoadingChunks.size() == 0) { break; }
+		for (int32 j = 0; j < cmLoadingChunks.size(); j++)
 		{
-			if (*it == cmLoadedChunks.at(j).getPosition()) 
-			{
-				chunksToLoad.erase(it);
+			if (chunksToLoad.at(i) == cmLoadingChunks.at(j))
+			{ 
+				chunksToLoad.erase(chunksToLoad.begin() + i);
+				break;
 			}
 		}
 	}
-	for (auto it = cmLoadedChunks.begin(); it != cmLoadedChunks.end(); it++)
+	//Check for loaded chunks
+	for (int32 i = chunksToLoad.size()-1; i >= 0; i--)
 	{
-		for (uint32 j = 0; j < chunksToLoad.size(); j++)
+		if (chunksToLoad.size() == 0) { break; }
+		for (int32 j = 0; j < cmLoadedChunks.size(); j++)
 		{
-			if (it->getPosition() == chunksToLoad.at(j))
-			{
-				cmLoadedChunks.erase(it);
+			if (chunksToLoad.at(i) == cmLoadedChunks.at(j).getPosition())
+			{ 
+				chunksToLoad.erase(chunksToLoad.begin() + i);
+				break;
 			}
 		}
 	}
+	std::cout << chunksToLoad.size() << std::endl;
 	pushQueueIn(chunksToLoad);
 }
 
@@ -114,7 +122,9 @@ void ChunkManager::pushQueueIn(std::vector<glm::vec3> data)
 
 	for (uint32_t i = 0; i < data.size(); i++)
 	{
-		cmInQueue.push(data.at(i));
+		glm::vec3 currentPos = data.at(i);
+		cmLoadingChunks.push_back(currentPos);
+		cmInQueue.push(currentPos);
 
 		//Signal semaphore
 		ReleaseSemaphore(
@@ -249,6 +259,14 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
 	cmLoadedChunks.push_back(chunky);
+
+	for (auto it = cmLoadingChunks.begin(); it != cmLoadingChunks.end(); it++) {
+		if(*it == chunkPosition)
+		{ 
+			cmLoadingChunks.erase(it);
+			break;
+		}
+	}
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;

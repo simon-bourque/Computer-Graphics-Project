@@ -57,8 +57,9 @@ private:
 	std::mutex cmInMutex;
 	std::mutex cmOutMutex;
 
-	//Loaded chunks
+	//Loading Chunks
 	static const uint32 LOADINGRADIUS = 4;
+	std::vector<glm::vec3> cmLoadingChunks;
 	std::vector<Chunk> cmLoadedChunks;
 
 	//Input and Output queues
