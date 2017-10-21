@@ -2,6 +2,10 @@
 
 out vec3 finalColor;
 
+in float height;
+
 void main() {
-	finalColor = vec3(0.0, 0.0, 1.0);
+	float h = mod(height,10.0)/10.0;
+	float h2 = mod(height,100.0)/100.0;
+	finalColor = vec3(0.2, h2, h);
 }

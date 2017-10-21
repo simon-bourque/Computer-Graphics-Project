@@ -66,79 +66,66 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 		{
 			int index = row*chunkWidth + col;
 
-			// Check left block if not first column
-			if(col > 0)
-				fillVerticalGaps(chunkBlocks[index], chunkBlocks[index - 1], chunkBlocks);
-			else
-			{
-				// Check if block on other chunk to the left is much lower than curr block
-				glm::vec3 leftBlockPos = chunkBlocks[index].getPosition() - glm::vec3(1, 0, 0); 
-				fillVerticalGaps(chunkBlocks[index], leftBlockPos, chunkBlocks);
-			}
+			// Get positions of four adjacent blocks to current block
+			glm::vec3 leftBlockPos, upBlockPos, downBlockPos, rightBlockPos;
+			glm::vec3 currBlockPos = chunkBlocks[index].getPosition();
 
-			// Check up block if not first row
+
+			// Get position of left adjacent block if not currently on  first column
+			if (col > 0)
+				leftBlockPos = chunkBlocks[index - 1].getPosition();
+			else
+				leftBlockPos = getHeightmapPosition( currBlockPos - glm::vec3(1, 0, 0) );
+
+			// Get position of right adjacent block on next chunk if currBlock on last column
+			if (col < chunkWidth - 1)
+				rightBlockPos = chunkBlocks[index + 1].getPosition();
+			else 
+				rightBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(1, 0, 0) );
+			
+			// Get position of up adjacent block if not currently on  first row
 			if (row > 0)
-				fillVerticalGaps(chunkBlocks[index], chunkBlocks[index - chunkWidth], chunkBlocks);
+				upBlockPos = chunkBlocks[index - chunkWidth].getPosition();
 			else
-			{
-				// Check if block on other chunk further in +z direction is much lower than curr block
-				glm::vec3 upBlockPos = chunkBlocks[index].getPosition() + glm::vec3(0, 0, 1);
-				fillVerticalGaps(chunkBlocks[index], upBlockPos, chunkBlocks);
-			}
+				upBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(0, 0, 1) );
 
-			// Check right block on next chunk if currBlock on last column
-			if(col == chunkWidth - 1) {
-				// Check if block on other chunk to the right is much lower than curr block
-				glm::vec3 rightBlockPos = chunkBlocks[index].getPosition() + glm::vec3(1, 0, 0);
-				fillVerticalGaps(chunkBlocks[index], rightBlockPos, chunkBlocks);
-			}
+			// Get position of down adjacent block if not currently on last row
+			if (row < chunkWidth - 1)
+				downBlockPos = chunkBlocks[index + chunkWidth].getPosition();
+			else
+				downBlockPos = getHeightmapPosition( currBlockPos - glm::vec3(0, 0, 1) );
 
-			// Check down block on next chunk if currBlock on last row
-			if (row == chunkWidth - 1) {
-				// Check if block on other chunk further in -z direction is much lower than curr block
-				glm::vec3 downBlockPos = chunkBlocks[index].getPosition() - glm::vec3(0, 0, 1);
-				fillVerticalGaps(chunkBlocks[index], downBlockPos, chunkBlocks);
-			}
+
+			// Get maximum height difference bw current block and four adjacent blocks
+			int heightDifference = currBlockPos.y - leftBlockPos.y;
+			heightDifference = (heightDifference > currBlockPos.y - rightBlockPos.y) ? heightDifference : currBlockPos.y - rightBlockPos.y;
+			heightDifference = (heightDifference > currBlockPos.y - upBlockPos.y) ? heightDifference : currBlockPos.y - upBlockPos.y;
+			heightDifference = (heightDifference > currBlockPos.y - downBlockPos.y) ? heightDifference : currBlockPos.y - downBlockPos.y;
+
+			// Duplicate the current block vertically to fill gaps
+			if (heightDifference > 1)
+				duplicateBlockVertically(chunkBlocks[index], heightDifference, chunkBlocks);
 
 		}
 	}
 }
 
-void TerrainBuilder::fillVerticalGaps(Block& currBlock, Block& checkBlock, vector<Block>& chunkBlocks)
-{
-	int heightDifference = currBlock.getPosition().y - checkBlock.getPosition().y;
-	
-	// If currBlock is two or more block heights higher than the checked Block, duplicate currBlock
-	if(heightDifference > 1)
-		duplicateBlockVertically(currBlock, heightDifference, chunkBlocks);
-
-	// If Checked Block is two or more block heights higher than the curr Block, duplicate Checked Block
-	if (heightDifference < -1)
-		duplicateBlockVertically(checkBlock, abs(heightDifference), chunkBlocks);
-}
-
-void TerrainBuilder::fillVerticalGaps(Block& currBlock, glm::vec3& checkPosition, vector<Block>& chunkBlocks)
-{
-	// Get height value of checked block in other chunk
-	float yPos = (noiseGenerator.GetNoise(checkPosition.x, checkPosition.z) + 1)*.5; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
-	yPos = floor(yPos*ChunkManager::CHUNKHEIGHT); // Make the y-position be a discrete value bw 0 and max chunk height
-
-	int heightDifference = currBlock.getPosition().y - yPos;
-
-	// If currBlock is two or more block heights higher than the checked Block, duplicate currBlock
-	if (heightDifference > 1)
-		duplicateBlockVertically(currBlock, heightDifference, chunkBlocks);
-
-}
-
 void TerrainBuilder::duplicateBlockVertically(Block& BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks)
 {
-	for (int i = 1; i < heightDifference; i++)
+	for (int i = 0; i < heightDifference; i++)
 	{
 		glm::vec3 newBlockPos = BlockToDuplicate.getPosition() - glm::vec3(0, i, 0);
 		Block newBlock(newBlockPos, getBlockType(newBlockPos.y));
 		chunkBlocks.push_back(newBlock);
 	}
+}
+
+glm::vec3 TerrainBuilder::getHeightmapPosition(glm::vec3 xzPosition)
+{
+	// Get height value at block position
+	float yPos = (noiseGenerator.GetNoise(xzPosition.x, xzPosition.z) + 1)*.5; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
+	xzPosition.y = floor(yPos*ChunkManager::CHUNKHEIGHT); // Make the y-position be a discrete value bw 0 and max chunk height
+	return xzPosition;
 }
 
 BlockType TerrainBuilder::getBlockType(const float elevation)
