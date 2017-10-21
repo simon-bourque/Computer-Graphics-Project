@@ -1,11 +1,13 @@
 #version 430
 
-out vec3 finalColor;
+layout(binding = 0) uniform sampler2DArray tilesheet;
 
-in float height;
+flat in int passFaceIndex;
+in vec2 passUvCoords;
+
+out vec4 finalColor;
 
 void main() {
-	float h = mod(height,10.0)/10.0;
-	float h2 = mod(height,100.0)/100.0;
-	finalColor = vec3(0.2, h2, h);
+	//finalColor = vec4(0.0, 0.0, 1.0, 1.0);
+	finalColor = texture(tilesheet, vec3(passUvCoords.x, passUvCoords.y, passFaceIndex));
 }

@@ -40,6 +40,7 @@ Texture* cubeTexture = nullptr;
 glm::vec3 playerPosition(0, 160, 2);
 
 ShaderProgram* chunkShader = nullptr;
+Texture* chunkTexture = nullptr;
 
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
@@ -53,6 +54,7 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
+		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
 
 		initTestCube();
 	}
@@ -68,6 +70,17 @@ int main() {
 
 	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
+
+	// Load face data for shader
+	std::vector<glm::vec3> faceData;
+	faceData.push_back(glm::vec3(1, 0, 2)); // Grass
+	faceData.push_back(glm::vec3(3, 3, 3)); // Log
+	faceData.push_back(glm::vec3(4, 4, 4)); // Leaves
+	faceData.push_back(glm::vec3(2, 2, 2)); // Dirt
+	faceData.push_back(glm::vec3(5, 5, 5)); // Sand
+	faceData.push_back(glm::vec3(6, 6, 6)); // Snow
+	chunkShader->use();
+	chunkShader->setUniform("faceData", faceData);
 
 	// Start loop
 	uint32 frames = 0;
@@ -149,31 +162,32 @@ void render() {
 
 	// Render chunks
 	chunkShader->use();
+	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkTexture->bind(Texture::UNIT_0);
 	const std::vector<Chunk> chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
 	for (const Chunk& chunk : chunks) {
 		glBindVertexArray(chunk.getVao());
-
-		chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
-
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.getBlockCount());
 	}
 
 	// Render test cube
 	cubeShader->use();
-
+	
 	cubeModel->bind();
-
+	
 	cubeShader->setUniform("mvpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	cubeShader->setUniform("color", glm::vec3(1, 0, 0));
-
+	
 	glDrawElements(GL_TRIANGLES, cubeModel->getCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 void initTestCube() {
 	std::vector<float32> vertices;
+	std::vector<float32> uvCoords;
+	std::vector<float32> normals;
 	std::vector<uint32> indices;
 
-	cube::fill(vertices, indices);
+	cube::fill(vertices, uvCoords, normals, indices);
 
 	cubeModel = RenderingContext::get()->modelCache.loadModel("cube", vertices, indices);
 	cubeShader = RenderingContext::get()->shaderCache.loadShaderProgram("test_cube", "test_cube_vert.glsl", "test_cube_frag.glsl");

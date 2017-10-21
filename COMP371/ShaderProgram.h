@@ -5,6 +5,9 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <vector>
+
+#include "Types.h"
 
 class ShaderProgram {
 	friend class ShaderCache;
@@ -21,5 +24,8 @@ public:
 
 	void setUniform(const std::string& uniformName, const glm::mat4& matrix);
 	void setUniform(const std::string& uniformName, const glm::vec3& vector);
+	void setUniform(const std::string& uniformName, int32 integer);
+
+	void setUniform(const std::string& uniformName, const std::vector<glm::vec3>& vectors);
 };
 
