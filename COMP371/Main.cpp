@@ -37,7 +37,7 @@ ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
-glm::vec3 playerPosition(0.0f,0.0f,0.0f);
+glm::vec3 playerPosition(0, 160, 2);
 
 ShaderProgram* chunkShader = nullptr;
 
@@ -137,6 +137,10 @@ GLFWwindow* initGLFW() {
 void update(float32 deltaSeconds) {
 	// Update logic...
 	gCameraController->update(deltaSeconds);
+
+	const Transform& playerTransform = RenderingContext::get()->camera.transform;
+	glm::vec3 playerPos(playerTransform.xPos, playerTransform.yPos, playerTransform.zPos);
+	//ChunkManager::instance()->loadChunks(playerPos);
 	ChunkManager::instance()->uploadQueuedChunk();
 }
 
