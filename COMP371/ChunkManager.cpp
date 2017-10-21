@@ -196,10 +196,12 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	glBindVertexArray(chunkVao);
 
 	std::vector<float32> vertices;
+	std::vector<float32> uvCoords;
+	std::vector<float32> normals;
 	std::vector<uint32> indices;
 	std::vector<GLuint> vbos;
 
-	cube::fill(vertices, indices);
+	cube::fill(vertices, uvCoords, normals, indices);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -208,6 +210,22 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 	vbos.push_back(vbo);
+
+	GLuint uvVbo;
+	glGenBuffers(1, &uvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float32) * uvCoords.size(), uvCoords.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, nullptr);
+	vbos.push_back(uvVbo);
+
+	GLuint normalVbo;
+	glGenBuffers(1, &normalVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float32) * normals.size(), normals.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, nullptr);
+	vbos.push_back(normalVbo);
 
 	GLuint ebo;
 	glGenBuffers(1, &ebo);
@@ -242,7 +260,7 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	glBindBuffer(GL_ARRAY_BUFFER, textureIndexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uint32) * chunkData.size(), textureIndices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 1, GL_UNSIGNED_INT, false, 0, nullptr);
+	glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT, 0, nullptr);
 	glVertexAttribDivisor(4, 1);
 
 	vbos.push_back(positionBuffer);
