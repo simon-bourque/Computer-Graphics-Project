@@ -17,7 +17,7 @@ TerrainBuilder::~TerrainBuilder()
  */
 vector<Block> TerrainBuilder::getChunkBlocks(Chunk chunk)
 {
-	vector<Block> chunkBlocks= getChunkHeightmap(chunk);
+	vector<Block> chunkBlocks = getChunkHeightmap(chunk);
 	fillChunkGaps(chunkBlocks);
 	return chunkBlocks;
 }
@@ -33,7 +33,7 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 	
 	vector<Block> heightmapBlocks;
 	heightmapBlocks.reserve(chunkSize * chunkSize);
-
+	bool flipper = true;
 	for (int row = 0; row < chunkSize; row++)
 	{
 		for (int col = 0; col < chunkSize; col++)
@@ -41,13 +41,14 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 			// Get Block position 
 			float xPos = chunkOriginPos.x + col;
 			float zPos = chunkOriginPos.z + row;
-			float yPos = (noiseGenerator.GetNoise(xPos, zPos)+1)*.5; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
+			float yPos = (noiseGenerator.GetNoise(xPos, zPos) + 1)*.5f; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
 			yPos = floor(yPos*ChunkManager::CHUNKHEIGHT); // Make the y-position be a discrete value bw 0 and max chunk height
 
 			glm::vec3 blockPos(xPos, yPos,zPos);
 
 			// Create and push new heightMap block
 			Block tempBlock(blockPos, getBlockType(blockPos.y));
+
 			heightmapBlocks.push_back(tempBlock);
 		}
 	}
@@ -97,14 +98,14 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 
 
 			// Get maximum height difference bw current block and four adjacent blocks
-			int heightDifference = currBlockPos.y - leftBlockPos.y;
+			float heightDifference = currBlockPos.y - leftBlockPos.y;
 			heightDifference = (heightDifference > currBlockPos.y - rightBlockPos.y) ? heightDifference : currBlockPos.y - rightBlockPos.y;
 			heightDifference = (heightDifference > currBlockPos.y - upBlockPos.y) ? heightDifference : currBlockPos.y - upBlockPos.y;
 			heightDifference = (heightDifference > currBlockPos.y - downBlockPos.y) ? heightDifference : currBlockPos.y - downBlockPos.y;
 
 			// Duplicate the current block vertically to fill gaps
-			if (heightDifference > 1)
-				duplicateBlockVertically(chunkBlocks[index], heightDifference, chunkBlocks);
+			if (heightDifference > 1.0f)
+				duplicateBlockVertically(chunkBlocks[index], int(nearbyint(heightDifference)), chunkBlocks);
 
 		}
 	}
@@ -123,13 +124,14 @@ void TerrainBuilder::duplicateBlockVertically(Block& BlockToDuplicate, int heigh
 glm::vec3 TerrainBuilder::getHeightmapPosition(glm::vec3 xzPosition)
 {
 	// Get height value at block position
-	float yPos = (noiseGenerator.GetNoise(xzPosition.x, xzPosition.z) + 1)*.5; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
+	float yPos = (noiseGenerator.GetNoise(xzPosition.x, xzPosition.z) + 1)*.5f; // height range:[-1,1]->[0,1] (Normalize height to between 0 and 1)
 	xzPosition.y = floor(yPos*ChunkManager::CHUNKHEIGHT); // Make the y-position be a discrete value bw 0 and max chunk height
 	return xzPosition;
 }
 
 BlockType TerrainBuilder::getBlockType(const float elevation)
 {
+	return BlockType::GRASS;
 	int maxHeight = ChunkManager::CHUNKHEIGHT;
 	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
 	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;

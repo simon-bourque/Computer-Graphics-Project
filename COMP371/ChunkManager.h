@@ -38,7 +38,7 @@ public:
 	friend DWORD WINAPI cmRoutine(LPVOID p);
 
 	//Chunk Dimensions
-	static const uint32 CHUNKWIDTH = 32;
+	static const uint32 CHUNKWIDTH = 31;
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
