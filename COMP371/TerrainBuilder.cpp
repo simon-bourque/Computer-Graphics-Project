@@ -111,9 +111,9 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 	}
 }
 
-void TerrainBuilder::duplicateBlockVertically(Block& BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks)
+void TerrainBuilder::duplicateBlockVertically(Block BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks)
 {
-	for (int i = 0; i < heightDifference; i++)
+	for (int i = 1; i < heightDifference; i++)
 	{
 		glm::vec3 newBlockPos = BlockToDuplicate.getPosition() - glm::vec3(0, i, 0);
 		Block newBlock(newBlockPos, getBlockType(newBlockPos.y));
@@ -131,7 +131,6 @@ glm::vec3 TerrainBuilder::getHeightmapPosition(glm::vec3 xzPosition)
 
 BlockType TerrainBuilder::getBlockType(const float elevation)
 {
-	return BlockType::GRASS;
 	int maxHeight = ChunkManager::CHUNKHEIGHT;
 	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
 	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;

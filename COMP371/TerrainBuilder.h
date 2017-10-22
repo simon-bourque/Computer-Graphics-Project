@@ -21,7 +21,7 @@ private:
 	vector<Block> getChunkHeightmap(Chunk chunk);
 
 	void fillChunkGaps(vector<Block>& chunkBlocks);
-	void duplicateBlockVertically(Block& BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks);
+	void duplicateBlockVertically(Block BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks);
 	glm::vec3 getHeightmapPosition(glm::vec3 xzPosition);
 
 };
