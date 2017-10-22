@@ -85,15 +85,15 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			
 			// Get position of up adjacent block if not currently on  first row
 			if (row > 0)
-				upBlockPos = chunkBlocks[index - chunkWidth].getPosition();
+				downBlockPos = chunkBlocks[index - chunkWidth].getPosition();
 			else
-				upBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(0, 0, 1) );
+				downBlockPos = getHeightmapPosition( currBlockPos - glm::vec3(0, 0, 1) );
 
 			// Get position of down adjacent block if not currently on last row
 			if (row < chunkWidth - 1)
-				downBlockPos = chunkBlocks[index + chunkWidth].getPosition();
+				upBlockPos = chunkBlocks[index + chunkWidth].getPosition();
 			else
-				downBlockPos = getHeightmapPosition( currBlockPos - glm::vec3(0, 0, 1) );
+				upBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(0, 0, 1) );
 
 
 			// Get maximum height difference bw current block and four adjacent blocks
