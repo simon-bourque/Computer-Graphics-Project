@@ -1,6 +1,7 @@
 #pragma once
 //Standard Library
 #include <queue>
+#include <unordered_map>
 #include <mutex>
 
 //Windows API
@@ -43,7 +44,7 @@ public:
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
-	const std::vector<Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
+	const std::unordered_map<int64, Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
 
 private:
 	static const uint32 SEED = 666;
@@ -60,8 +61,8 @@ private:
 
 	//Loading Chunks
 	static const uint32 LOADINGRADIUS = 4;
-	std::vector<glm::vec3> cmLoadingChunks;
-	std::vector<Chunk> cmLoadedChunks;
+	std::vector<glm::vec3> cmLoadingChunks; //CHANGE THIS TO HASHMAP
+	std::unordered_map<int64, Chunk> cmLoadedChunks; //CHANGE THIS TO HASHMAP
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;

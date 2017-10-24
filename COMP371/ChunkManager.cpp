@@ -6,6 +6,11 @@
 #include <GL/glew.h>
 #include "Primitives.h"
 
+constexpr int64 encodePosition(int32 x, int32 z)
+{
+	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
+}
+
 ChunkManager::ChunkManager()
 	:cmTerrainBuilder(ChunkManager::SEED)
 {
@@ -108,13 +113,10 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 	for (int32 i = chunksToLoad.size()-1; i >= 0; i--)
 	{
 		if (chunksToLoad.size() == 0) { break; }
-		for (int32 j = 0; j < cmLoadedChunks.size(); j++)
+		const auto& it = cmLoadedChunks.find(encodePosition(chunksToLoad.at(i).x, chunksToLoad.at(i).z));
+		if (it != cmLoadedChunks.end())
 		{
-			if (chunksToLoad.at(i) == cmLoadedChunks.at(j).getPosition())
-			{ 
-				chunksToLoad.erase(chunksToLoad.begin() + i);
-				break;
-			}
+			chunksToLoad.erase(chunksToLoad.begin() +i);
 		}
 	}
 	pushQueueIn(chunksToLoad);
@@ -289,7 +291,7 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVao(chunkVao);
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
-	cmLoadedChunks.push_back(chunky);
+	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
 
 	for (auto it = cmLoadingChunks.begin(); it != cmLoadingChunks.end(); it++) {
 		if(*it == chunkPosition)

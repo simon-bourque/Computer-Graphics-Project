@@ -13,7 +13,9 @@ struct Chunk
 	//Constructor
 	Chunk(glm::vec3 position)
 		: m_position(position)
-	{}
+	{};
+
+	Chunk() {};
 
 	//Getters
 	glm::vec3 getPosition() const { return m_position; }

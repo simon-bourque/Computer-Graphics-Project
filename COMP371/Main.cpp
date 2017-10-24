@@ -172,10 +172,10 @@ void render() {
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	chunkTexture->bind(Texture::UNIT_0);
-	const std::vector<Chunk> chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
-	for (const Chunk& chunk : chunks) {
-		glBindVertexArray(chunk.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.getBlockCount());
+	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
 
 	// Render test cube
