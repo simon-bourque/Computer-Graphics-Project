@@ -153,7 +153,15 @@ void update(float32 deltaSeconds) {
 
 	const Transform& playerTransform = RenderingContext::get()->camera.transform;
 	glm::vec3 playerPos(playerTransform.xPos, playerTransform.yPos, playerTransform.zPos);
-	ChunkManager::instance()->loadChunks(playerPos);
+	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(playerPos);
+
+	// Spooky hack lol
+	static glm::vec3 lastChunk(currentChunk.x + 1.0f, currentChunk.y, currentChunk.z);
+
+	if (currentChunk != lastChunk) {
+		ChunkManager::instance()->loadChunks(currentChunk);
+		lastChunk = currentChunk;
+	}
 	ChunkManager::instance()->uploadQueuedChunk();
 }
 

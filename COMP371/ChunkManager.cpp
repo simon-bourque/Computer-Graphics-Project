@@ -48,11 +48,9 @@ DWORD WINAPI cmRoutine(LPVOID p)
 	return 0;
 }
 
-void ChunkManager::loadChunks(glm::vec3 playerPosition) 
+void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
-	//Coordinates pointers to make the algorithm easier. Casting them to integer to get the coordinate of the chunk the player is standing in
-	float32 flooredX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
-	float32 flooredZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredX = currentChunk.x, flooredZ = currentChunk.z;
 	float32 currentX = flooredX, currentZ = flooredZ;
 	std::vector<glm::vec3> chunksToLoad;
 	uint32 decrementor = 0;
@@ -183,6 +181,14 @@ ChunkManager* ChunkManager::instance()
 	if (!sChunkManager)
 		sChunkManager = new ChunkManager;
 	return sChunkManager;
+}
+
+glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
+{
+	float32 flooredX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+
+	return glm::vec3(flooredX, 0, flooredZ);
 }
 
 ChunkManager::~ChunkManager()
