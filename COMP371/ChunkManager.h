@@ -54,6 +54,7 @@ private:
 	static const uint32 THREADCOUNT = 4;
 	HANDLE cmThreadH [THREADCOUNT];
 	DWORD cmThreadId [THREADCOUNT];
+	void startThreads();
 
 	HANDLE cmSemaphore;
 	std::mutex cmInMutex;
@@ -62,7 +63,7 @@ private:
 	//Loading Chunks
 	static const uint32 LOADINGRADIUS = 4;
 	std::vector<glm::vec3> cmLoadingChunks; //CHANGE THIS TO HASHMAP
-	std::unordered_map<int64, Chunk> cmLoadedChunks; //CHANGE THIS TO HASHMAP
+	std::unordered_map<int64, Chunk> cmLoadedChunks;
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;

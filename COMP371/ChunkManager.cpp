@@ -24,12 +24,12 @@ ChunkManager::ChunkManager()
 	for (uint32 i = 0; i < THREADCOUNT; i++)
 	{
 		cmThreadH[i] = CreateThread(
-			NULL,			//Default security attributes
-			0,				//Default stack size
-			cmRoutine,		//Thread function name
-			NULL,			//Argument to thread function
-			0,				//Creation flag
-			&cmThreadId[i]	//The thread identifiers
+			NULL,				//Default security attributes
+			0,					//Default stack size
+			cmRoutine,			//Thread function name
+			NULL,				//Argument to thread function
+			CREATE_SUSPENDED,	//Creation flag
+			&cmThreadId[i]		//The thread identifiers
 		);
 	}
 
@@ -90,10 +90,6 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		}
 		decrementor++;
-	}
-
-	if (chunksToLoad.size() < 41) {
-		std::cout << chunksToLoad.size() << std::endl;
 	}
 
 	//Check for loading chunks
@@ -181,8 +177,19 @@ void ChunkManager::uploadQueuedChunk()
 ChunkManager* ChunkManager::instance() 
 {
 	if (!sChunkManager)
+	{
 		sChunkManager = new ChunkManager;
+		sChunkManager->startThreads();
+	}
 	return sChunkManager;
+}
+
+void ChunkManager::startThreads()
+{
+	for (uint32 i = 0; i < THREADCOUNT; i++)
+	{
+		ResumeThread(cmThreadH[i]);
+	}
 }
 
 glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
