@@ -6,6 +6,11 @@
 #include <GL/glew.h>
 #include "Primitives.h"
 
+constexpr int64 encodePosition(int32 x, int32 z)
+{
+	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
+}
+
 ChunkManager::ChunkManager()
 	:cmTerrainBuilder(ChunkManager::SEED)
 {
@@ -19,12 +24,12 @@ ChunkManager::ChunkManager()
 	for (uint32 i = 0; i < THREADCOUNT; i++)
 	{
 		cmThreadH[i] = CreateThread(
-			NULL,			//Default security attributes
-			0,				//Default stack size
-			cmRoutine,		//Thread function name
-			NULL,			//Argument to thread function
-			0,				//Creation flag
-			&cmThreadId[i]	//The thread identifiers
+			NULL,				//Default security attributes
+			0,					//Default stack size
+			cmRoutine,			//Thread function name
+			NULL,				//Argument to thread function
+			CREATE_SUSPENDED,	//Creation flag
+			&cmThreadId[i]		//The thread identifiers
 		);
 	}
 
@@ -48,11 +53,9 @@ DWORD WINAPI cmRoutine(LPVOID p)
 	return 0;
 }
 
-void ChunkManager::loadChunks(glm::vec3 playerPosition) 
+void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
-	//Coordinates pointers to make the algorithm easier. Casting them to integer to get the coordinate of the chunk the player is standing in
-	float32 flooredX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
-	float32 flooredZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredX = currentChunk.x, flooredZ = currentChunk.z;
 	float32 currentX = flooredX, currentZ = flooredZ;
 	std::vector<glm::vec3> chunksToLoad;
 	uint32 decrementor = 0;
@@ -89,34 +92,17 @@ void ChunkManager::loadChunks(glm::vec3 playerPosition)
 		decrementor++;
 	}
 
-	if (chunksToLoad.size() < 41) {
-		std::cout << chunksToLoad.size() << std::endl;
-	}
+	//Check for loaded and loading chunks
+	for (int32 i = chunksToLoad.size() - 1; i >= 0; i--)
+	{
+		int64 chunkPosition = encodePosition(chunksToLoad.at(i).x, chunksToLoad.at(i).z);
 
-	//Check for loading chunks
-	for(int32 i = chunksToLoad.size()-1; i >= 0; i--)
-	{
-		if (cmLoadingChunks.size() == 0) { break; }
-		for (int32 j = 0; j < cmLoadingChunks.size(); j++)
+		const auto& loadedIt = cmLoadedChunks.find(chunkPosition);
+		const auto& loadingIt = cmLoadingChunks.find(chunkPosition);
+
+		if (loadedIt != cmLoadedChunks.end() || loadingIt != cmLoadingChunks.end())
 		{
-			if (chunksToLoad.at(i) == cmLoadingChunks.at(j))
-			{ 
-				chunksToLoad.erase(chunksToLoad.begin() + i);
-				break;
-			}
-		}
-	}
-	//Check for loaded chunks
-	for (int32 i = chunksToLoad.size()-1; i >= 0; i--)
-	{
-		if (chunksToLoad.size() == 0) { break; }
-		for (int32 j = 0; j < cmLoadedChunks.size(); j++)
-		{
-			if (chunksToLoad.at(i) == cmLoadedChunks.at(j).getPosition())
-			{ 
-				chunksToLoad.erase(chunksToLoad.begin() + i);
-				break;
-			}
+			chunksToLoad.erase(chunksToLoad.begin() + i);
 		}
 	}
 	pushQueueIn(chunksToLoad);
@@ -129,7 +115,7 @@ void ChunkManager::pushQueueIn(std::vector<glm::vec3> data)
 	for (uint32_t i = 0; i < data.size(); i++)
 	{
 		glm::vec3 currentPos = data.at(i);
-		cmLoadingChunks.push_back(currentPos);
+		cmLoadingChunks[encodePosition(currentPos.x, currentPos.z)] = Chunk(currentPos);
 		cmInQueue.push(currentPos);
 
 		//Signal semaphore
@@ -181,8 +167,27 @@ void ChunkManager::uploadQueuedChunk()
 ChunkManager* ChunkManager::instance() 
 {
 	if (!sChunkManager)
+	{
 		sChunkManager = new ChunkManager;
+		sChunkManager->startThreads();
+	}
 	return sChunkManager;
+}
+
+void ChunkManager::startThreads()
+{
+	for (uint32 i = 0; i < THREADCOUNT; i++)
+	{
+		ResumeThread(cmThreadH[i]);
+	}
+}
+
+glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
+{
+	float32 flooredX = floor((playerPosition.x / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+	float32 flooredZ = floor((playerPosition.z / CHUNKWIDTH) + 0.5)*CHUNKWIDTH;
+
+	return glm::vec3(flooredX, 0, flooredZ);
 }
 
 ChunkManager::~ChunkManager()
@@ -283,15 +288,8 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVao(chunkVao);
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
-	cmLoadedChunks.push_back(chunky);
-
-	for (auto it = cmLoadingChunks.begin(); it != cmLoadingChunks.end(); it++) {
-		if(*it == chunkPosition)
-		{ 
-			cmLoadingChunks.erase(it);
-			break;
-		}
-	}
+	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
+	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;

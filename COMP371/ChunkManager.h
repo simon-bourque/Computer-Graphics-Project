@@ -1,6 +1,7 @@
 #pragma once
 //Standard Library
 #include <queue>
+#include <unordered_map>
 #include <mutex>
 
 //Windows API
@@ -26,6 +27,7 @@ public:
 	//Getters
 	static ChunkManager* instance();
 	HANDLE getSemaphoreHandle() const { return cmSemaphore; }
+	glm::vec3 getCurrentChunk(glm::vec3 playerPosition) const;
 
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
@@ -42,7 +44,7 @@ public:
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
-	const std::vector<Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
+	const std::unordered_map<int64, Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
 
 private:
 	static const uint32 SEED = 666;
@@ -52,6 +54,7 @@ private:
 	static const uint32 THREADCOUNT = 4;
 	HANDLE cmThreadH [THREADCOUNT];
 	DWORD cmThreadId [THREADCOUNT];
+	void startThreads();
 
 	HANDLE cmSemaphore;
 	std::mutex cmInMutex;
@@ -59,8 +62,8 @@ private:
 
 	//Loading Chunks
 	static const uint32 LOADINGRADIUS = 4;
-	std::vector<glm::vec3> cmLoadingChunks;
-	std::vector<Chunk> cmLoadedChunks;
+	std::unordered_map<int64, Chunk> cmLoadingChunks;
+	std::unordered_map<int64, Chunk> cmLoadedChunks;
 
 	//Input and Output queues
 	std::queue<glm::vec3> cmInQueue;

@@ -5,6 +5,8 @@ TerrainBuilder::TerrainBuilder(int seed)
 {
 	noiseGenerator.SetSeed(seed);
 	noiseGenerator.SetNoiseType(FastNoise::PerlinFractal);
+	noiseGenerator.SetFrequency(0.005);
+	noiseGenerator.SetFractalOctaves(5);
 }
 
 TerrainBuilder::~TerrainBuilder()
@@ -33,7 +35,6 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 	
 	vector<Block> heightmapBlocks;
 	heightmapBlocks.reserve(chunkSize * chunkSize);
-	bool flipper = true;
 	for (int row = 0; row < chunkSize; row++)
 	{
 		for (int col = 0; col < chunkSize; col++)
@@ -135,6 +136,6 @@ BlockType TerrainBuilder::getBlockType(const float elevation)
 	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
 	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;
 	else if (elevation < 0.55f * maxHeight) return BlockType::GRASS;
-	else if (elevation < 0.75f * maxHeight) return BlockType::DIRT; // Can later be changed to like mountain-type blocks
+	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS; // Can later be changed to like mountain-type blocks
 	else  return BlockType::SNOW;
 }
