@@ -92,27 +92,17 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 		decrementor++;
 	}
 
-	//Check for loading chunks
-	for(int32 i = chunksToLoad.size()-1; i >= 0; i--)
+	//Check for loaded and loading chunks
+	for (int32 i = 0; i < chunksToLoad.size(); i++)
 	{
-		if (cmLoadingChunks.size() == 0) { break; }
-		for (int32 j = 0; j < cmLoadingChunks.size(); j++)
+		int64 chunkPosition = encodePosition(chunksToLoad.at(i).x, chunksToLoad.at(i).z);
+
+		const auto& loadedIt = cmLoadedChunks.find(chunkPosition);
+		const auto& loadingIt = cmLoadingChunks.find(chunkPosition);
+
+		if (loadedIt != cmLoadedChunks.end() || loadingIt != cmLoadingChunks.end())
 		{
-			if (chunksToLoad.at(i) == cmLoadingChunks.at(j))
-			{ 
-				chunksToLoad.erase(chunksToLoad.begin() + i);
-				break;
-			}
-		}
-	}
-	//Check for loaded chunks
-	for (int32 i = chunksToLoad.size()-1; i >= 0; i--)
-	{
-		if (chunksToLoad.size() == 0) { break; }
-		const auto& it = cmLoadedChunks.find(encodePosition(chunksToLoad.at(i).x, chunksToLoad.at(i).z));
-		if (it != cmLoadedChunks.end())
-		{
-			chunksToLoad.erase(chunksToLoad.begin() +i);
+			chunksToLoad.erase(chunksToLoad.begin() + i);
 		}
 	}
 	pushQueueIn(chunksToLoad);
@@ -125,7 +115,7 @@ void ChunkManager::pushQueueIn(std::vector<glm::vec3> data)
 	for (uint32_t i = 0; i < data.size(); i++)
 	{
 		glm::vec3 currentPos = data.at(i);
-		cmLoadingChunks.push_back(currentPos);
+		cmLoadingChunks[encodePosition(currentPos.x, currentPos.z)] = Chunk(currentPos);
 		cmInQueue.push(currentPos);
 
 		//Signal semaphore
@@ -299,14 +289,7 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
 	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
-
-	for (auto it = cmLoadingChunks.begin(); it != cmLoadingChunks.end(); it++) {
-		if(*it == chunkPosition)
-		{ 
-			cmLoadingChunks.erase(it);
-			break;
-		}
-	}
+	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;

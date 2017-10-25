@@ -62,7 +62,7 @@ private:
 
 	//Loading Chunks
 	static const uint32 LOADINGRADIUS = 4;
-	std::vector<glm::vec3> cmLoadingChunks; //CHANGE THIS TO HASHMAP
+	std::unordered_map<int64, Chunk> cmLoadingChunks;
 	std::unordered_map<int64, Chunk> cmLoadedChunks;
 
 	//Input and Output queues
