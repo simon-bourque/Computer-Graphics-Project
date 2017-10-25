@@ -93,7 +93,7 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 	}
 
 	//Check for loaded and loading chunks
-	for (int32 i = 0; i < chunksToLoad.size(); i++)
+	for (int32 i = chunksToLoad.size() - 1; i >= 0; i--)
 	{
 		int64 chunkPosition = encodePosition(chunksToLoad.at(i).x, chunksToLoad.at(i).z);
 
