@@ -42,6 +42,8 @@ glm::vec3 playerPosition(0, 160, 2);
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
 
+Texture* skyboxTexture = nullptr;
+
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
 
@@ -54,7 +56,17 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
-		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
+		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("chunk_texture", 7, "tiles.png");
+
+		// Load skybox texture
+		CubeMapPaths paths;
+		paths.bk = "craterlake_bk.tga";
+		paths.ft = "craterlake_ft.tga";
+		paths.up = "craterlake_up.tga";
+		paths.dn = "craterlake_dn.tga";
+		paths.lf = "craterlake_lf.tga";
+		paths.rt = "craterlake_rt.tga";
+		skyboxTexture = RenderingContext::get()->textureCache.loadTextureCubeMap("skybox_texture", paths);
 
 		initTestCube();
 	}
