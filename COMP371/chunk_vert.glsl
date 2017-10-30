@@ -12,6 +12,8 @@ uniform vec3 faceData[6]; // WARNING: This always has to match with the BlockTyp
 
 flat out int passFaceIndex;
 out vec2 passUvCoords;
+out vec3 passNormal;
+out vec3 fragPos;
 
 void main() {
 	// If this is the top face
@@ -28,10 +30,13 @@ void main() {
 	}
 
 	passUvCoords = uvCoords;
+	passNormal = normal;
 
 	mat4 blockTransform = mat4(1.0);
 	blockTransform[3][0] = instancePosition.x;
 	blockTransform[3][1] = instancePosition.y;
 	blockTransform[3][2] = instancePosition.z;
+	
+	fragPos = vec3(blockTransform * position);
 	gl_Position = vpMatrix * blockTransform * position;
 }

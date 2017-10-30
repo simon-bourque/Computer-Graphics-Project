@@ -139,6 +139,7 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
+    <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
+    <ClInclude Include="LightSource.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />
@@ -166,6 +168,8 @@
   <ItemGroup>
     <None Include="chunk_frag.glsl" />
     <None Include="chunk_vert.glsl" />
+    <None Include="shadowmap_frag.glsl" />
+    <None Include="shadowmap_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
     <None Include="test_cube_vert.glsl" />
   </ItemGroup>
