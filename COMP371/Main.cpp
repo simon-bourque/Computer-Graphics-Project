@@ -16,6 +16,8 @@
 
 #include "RenderingContext.h"
 
+#include "LightSource.h"
+
 #include "ModelCache.h"
 #include "Model.h"
 
@@ -81,6 +83,15 @@ int main() {
 	faceData.push_back(glm::vec3(6, 6, 6)); // Snow
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
+
+	glm::vec3 lightDirection(-0.5f, -0.5f, 0.0f);
+	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+	LightSource sun(lightDirection, lightColor, 0.1f, 0.5f);
+	chunkShader->use();
+	chunkShader->setUniform("lightColor", sun.getColor());
+	chunkShader->setUniform("lightDirection", sun.getDirection());
+	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
+	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
 
 	// Start loop
 	uint32 frames = 0;
@@ -163,6 +174,9 @@ void update(float32 deltaSeconds) {
 		lastChunk = currentChunk;
 	}
 	ChunkManager::instance()->uploadQueuedChunk();
+
+	chunkShader->use();
+	chunkShader->setUniform("viewPos", playerPos);
 }
 
 void render() {

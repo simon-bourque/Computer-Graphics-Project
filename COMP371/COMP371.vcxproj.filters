@@ -76,6 +76,9 @@
     <ClCompile Include="TerrainBuilder.cpp">
       <Filter>Core\Procedural</Filter>
     </ClCompile>
+    <ClCompile Include="LightSource.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="TerrainBuilder.h">
       <Filter>Core\Procedural</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSource.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
