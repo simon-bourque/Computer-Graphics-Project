@@ -84,9 +84,9 @@ int main() {
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
 
-	glm::vec3 lightDirection(-0.5f, -0.5f, 0.0f);
+	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	LightSource sun(lightDirection, lightColor, 0.1f, 0.5f);
+	LightSource sun(lightDirection, lightColor, 0.5f, 0.5f);
 	chunkShader->use();
 	chunkShader->setUniform("lightColor", sun.getColor());
 	chunkShader->setUniform("lightDirection", sun.getDirection());

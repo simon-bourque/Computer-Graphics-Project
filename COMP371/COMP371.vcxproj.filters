@@ -32,6 +32,9 @@
     <Filter Include="Core\Procedural">
       <UniqueIdentifier>{8e375280-b9ec-463c-a388-a190aa3b7009}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Lighting">
+      <UniqueIdentifier>{d2a68858-f17a-48a7-8724-0383c63a9610}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -77,7 +80,7 @@
       <Filter>Core\Procedural</Filter>
     </ClCompile>
     <ClCompile Include="LightSource.cpp">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Lighting</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,7 +133,7 @@
       <Filter>Core\Procedural</Filter>
     </ClInclude>
     <ClInclude Include="LightSource.h">
-      <Filter>Graphics</Filter>
+      <Filter>Graphics\Lighting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -144,6 +147,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shadowmap_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shadowmap_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -19,7 +19,6 @@ LightSource::LightSource(glm::vec3 position, glm::vec3 direction, glm::vec3 colo
 	m_direction = glm::normalize(-direction);
 }
 
-
 LightSource::~LightSource()
 {
 }
