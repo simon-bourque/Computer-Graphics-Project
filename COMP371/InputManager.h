@@ -1,19 +1,21 @@
 #ifndef INPUT_MANAGER_H
 #define INPUT_MANAGER_H
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 #include <vector>
 #include <tuple>
+#include <functional>
+
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class InputManager {
 
 public:
-	static InputManager* getInstance();
+	static InputManager* instance();
 
 	void registerDebugKey(int key, void(*function)());
-	void registerKeyCallback(void(*function)(int, int));
-	void registerMouseBtnCallback(void(*function)(int, int));
+	void registerKeyCallback(std::function<void(int, int)> function);
+	void registerMouseBtnCallback(std::function<void(int, int)> function);
 
 	void setVerbose(bool setting) { m_setting_verbose = setting; };
 	void setKeyRepeat(bool setting) { m_setting_key_repeat = setting; };
@@ -38,8 +40,8 @@ private:
 	glm::vec2 m_mouse_position;
 
 	std::vector <std::tuple<int, void(*)>> m_debug_keys;
-	std::vector<void(*)(int, int)> m_key_callbacks;
-	std::vector<void(*)(int, int)> m_mouse_btn_callbacks;
+	std::vector<std::function<void(int,int)>> m_key_callbacks;
+	std::vector<std::function<void(int, int)>> m_mouse_btn_callbacks;
 
 	// Settings
 	bool m_setting_verbose;

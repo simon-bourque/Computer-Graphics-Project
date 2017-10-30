@@ -152,9 +152,6 @@ GLFWwindow* initGLFW() {
 	
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
 
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) -> void { gCameraController->onKey(key, action); });
-	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) -> void { gCameraController->onMouseButton(button, action); });
-
 	return window;
 }
 

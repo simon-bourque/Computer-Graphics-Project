@@ -20,7 +20,7 @@ InputManager::~InputManager()
 	glfwSetErrorCallback(NULL);
 }
 
-InputManager* InputManager::getInstance()
+InputManager* InputManager::instance()
 {
 	if (_instance == nullptr)
 	{
@@ -51,12 +51,12 @@ void InputManager::registerDebugKey(int key, void(*function)())
 	m_debug_keys.push_back(t);
 }
 
-void InputManager::registerKeyCallback(void(*function)(int, int))
+void InputManager::registerKeyCallback(std::function<void(int, int)> function)
 {
 	m_key_callbacks.push_back(function);
 }
 
-void InputManager::registerMouseBtnCallback(void(*function)(int, int))
+void InputManager::registerMouseBtnCallback(std::function<void(int, int)> function)
 {
 	m_mouse_btn_callbacks.push_back(function);
 }
