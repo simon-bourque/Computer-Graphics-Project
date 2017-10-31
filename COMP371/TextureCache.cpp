@@ -70,10 +70,12 @@ Texture* TextureCache::loadTexture2DArray(const std::string& name, uint32 numTil
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, tileWidth, tileHeight, numTiles/*depth*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	stbi_image_free(data);
