@@ -86,7 +86,7 @@ int main() {
 
 	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	LightSource sun(lightDirection, lightColor, 0.5f, 0.5f);
+	LightSource sun(lightDirection, lightColor, 0.5f, 0.25f);
 	chunkShader->use();
 	chunkShader->setUniform("lightColor", sun.getColor());
 	chunkShader->setUniform("lightDirection", sun.getDirection());
@@ -138,6 +138,8 @@ GLFWwindow* initGLFW() {
 	}
 
 	glfwDefaultWindowHints();
+	// 8x MSAA
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
 

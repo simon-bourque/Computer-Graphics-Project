@@ -5,7 +5,7 @@
 #include "Types.h"
 
 /**
- * A directional light class meant to simulate light coming from the sun or the moon for example.
+ * A light source class meant to simulate light coming from the sun or the moon for example.
  */
 
 struct LightSource
