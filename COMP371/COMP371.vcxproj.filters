@@ -140,5 +140,11 @@
     <None Include="chunk_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="skybox_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

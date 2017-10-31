@@ -13,8 +13,8 @@ Camera::~Camera() {}
 void Camera::updateViewProjectMatrix() {
 	glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(-transform.xPos, -transform.yPos, -transform.zPos));
 	glm::mat4 s = glm::scale(glm::mat4(1.0f), glm::vec3(1 / transform.xScale, 1 / transform.yScale, 1 / transform.zScale));
-
-	m_viewProjectionMatrix = m_projectionMatrix * glm::toMat4(glm::conjugate(transform.rotation)) * s * t;
+	m_viewMatrix = glm::toMat4(glm::conjugate(transform.rotation)) * s * t;
+	m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 }
 
 void Camera::setPerspective(float32 fov, float32 aspectRatio, float32 near, float32 far) {

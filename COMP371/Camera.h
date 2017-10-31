@@ -11,6 +11,7 @@ class Camera {
 public:
 	Transform transform;
 private:
+	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
 	glm::mat4 m_viewProjectionMatrix;
 public:
@@ -21,6 +22,8 @@ public:
 	void updateViewProjectMatrix();
 
 	glm::mat4 getViewProjectionMatrix() const { return m_viewProjectionMatrix; };
+	glm::mat4 getProjectionMatrix() const { return m_projectionMatrix; };
+	glm::mat4 getViewMatrix() const { return m_viewMatrix; };
 	glm::vec3 getForward() const { return glm::rotate(transform.rotation, glm::vec3(0, 0, -1)); };
 	glm::vec3 getUp() const { return glm::rotate(transform.rotation, glm::vec3(0, 1, 0)); };
 
