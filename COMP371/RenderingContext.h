@@ -26,4 +26,3 @@ public:
 	static RenderingContext* get() { return s_instance; };
 	static void destroy() { delete s_instance; };
 };
-
