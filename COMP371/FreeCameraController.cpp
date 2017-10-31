@@ -1,6 +1,7 @@
 #include "FreeCameraController.h"
 
 #include "Camera.h"
+#include "InputManager.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -17,7 +18,11 @@ FreeCameraController::FreeCameraController(Camera* camera) :
 	m_downPressed(false),
 	m_rollLeftPressed(false),
 	m_rollRightPressed(false),
-	m_rightMouseButtonPressed(false) {}
+	m_rightMouseButtonPressed(false)
+{
+	InputManager::instance()->registerKeyCallback(std::bind(&FreeCameraController::onKey, this, std::placeholders::_1, std::placeholders::_2));
+	InputManager::instance()->registerMouseBtnCallback(std::bind(&FreeCameraController::onMouseButton, this, std::placeholders::_1, std::placeholders::_2));
+}
 
 
 FreeCameraController::~FreeCameraController() {}

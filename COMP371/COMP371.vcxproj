@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FreeCameraController.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelCache.cpp" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FreeCameraController.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
     <ClInclude Include="RenderingContext.h" />
