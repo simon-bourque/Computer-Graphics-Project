@@ -161,5 +161,8 @@
     <None Include="shadowmap_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="chunk_geo.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

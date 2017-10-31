@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="chunk_frag.glsl" />
+    <None Include="chunk_geo.glsl" />
     <None Include="chunk_vert.glsl" />
     <None Include="shadowmap_frag.glsl" />
     <None Include="shadowmap_vert.glsl" />

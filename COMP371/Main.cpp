@@ -55,7 +55,7 @@ int main() {
 		gWindow = initGLFW();
 
 		RenderingContext::init();
-		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
+		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl", "chunk_geo.glsl");
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
 
 		initTestCube();
@@ -184,6 +184,7 @@ void render() {
 	// Render chunks
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkShader->setUniform("viewMatrix", RenderingContext::get()->camera.getViewMatrix());
 	chunkTexture->bind(Texture::UNIT_0);
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
 	for (const auto& chunk : chunks) {

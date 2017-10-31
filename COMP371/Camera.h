@@ -21,6 +21,7 @@ public:
 	void updateViewProjectMatrix();
 
 	glm::mat4 getViewProjectionMatrix() const { return m_viewProjectionMatrix; };
+	glm::mat4 getViewMatrix() const;
 	glm::vec3 getForward() const { return glm::rotate(transform.rotation, glm::vec3(0, 0, -1)); };
 	glm::vec3 getUp() const { return glm::rotate(transform.rotation, glm::vec3(0, 1, 0)); };
 
