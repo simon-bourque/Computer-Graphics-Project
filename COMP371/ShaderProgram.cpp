@@ -21,6 +21,10 @@ void ShaderProgram::setUniform(const std::string& uniformName, int32 integer) {
 	glUniform1i(glGetUniformLocation(m_shaderHandle, uniformName.c_str()), integer);
 }
 
+void ShaderProgram::setUniform(const std::string& uniformName, float32 floatdata) {
+	glUniform1f(glGetUniformLocation(m_shaderHandle, uniformName.c_str()), floatdata);
+}
+
 void ShaderProgram::setUniform(const std::string& uniformName, const std::vector<glm::vec3>& vectors) {
 	GLint location = glGetUniformLocation(m_shaderHandle, uniformName.c_str());
 
