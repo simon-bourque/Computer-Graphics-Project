@@ -65,8 +65,6 @@ int main() {
 		system("pause");
 		return 1;
 	}
-	
-	ChunkManager::instance()->loadChunks(playerPosition);
 
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
