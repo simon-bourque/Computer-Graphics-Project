@@ -7,7 +7,6 @@ layout(location = 3) in vec3 instancePosition;
 layout(location = 4) in int faceIndex;
 
 uniform mat4 vpMatrix;
-uniform mat4 viewMatrix;
 
 uniform vec3 faceData[6]; // WARNING: This always has to match with the BlockType enum in Block.h
 

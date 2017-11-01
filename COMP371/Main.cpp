@@ -194,13 +194,11 @@ void render() {
 #ifdef COMPILE_DRAW_NORMALS
 	chunkNormalsShader->use();
 	chunkNormalsShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
-	chunkNormalsShader->setUniform("viewMatrix", RenderingContext::get()->camera.getViewMatrix());
 #endif
 
 	// Render chunks
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
-	chunkShader->setUniform("viewMatrix", RenderingContext::get()->camera.getViewMatrix());
 	chunkTexture->bind(Texture::UNIT_0);
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
 	for (const auto& chunk : chunks) {
