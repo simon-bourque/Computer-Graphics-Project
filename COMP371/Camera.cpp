@@ -17,13 +17,6 @@ void Camera::updateViewProjectMatrix() {
 	m_viewProjectionMatrix = m_projectionMatrix * glm::toMat4(glm::conjugate(transform.rotation)) * s * t;
 }
 
-glm::mat4 Camera::getViewMatrix() const {
-	glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(-transform.xPos, -transform.yPos, -transform.zPos));
-	glm::mat4 s = glm::scale(glm::mat4(1.0f), glm::vec3(1 / transform.xScale, 1 / transform.yScale, 1 / transform.zScale));
-
-	return glm::toMat4(glm::conjugate(transform.rotation)) * s * t;
-}
-
 void Camera::setPerspective(float32 fov, float32 aspectRatio, float32 near, float32 far) {
 	m_projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, near, far);
 }
