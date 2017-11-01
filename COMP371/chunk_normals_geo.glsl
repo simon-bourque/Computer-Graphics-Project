@@ -33,10 +33,10 @@ void main() {
 
 
 		gl_Position = gl_in[i].gl_Position;
-        EmitVertex();
+		EmitVertex();
 		
 		gl_Position = vpMatrix * vec4(passFromVertex[i].fragPos + (normal * 0.3), 1.0);
-        EmitVertex();
+		EmitVertex();
 
 		EndPrimitive();
 	}
