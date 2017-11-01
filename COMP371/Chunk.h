@@ -20,7 +20,7 @@ struct Chunk
 	//Getters
 	glm::vec3 getPosition() const { return m_position; }
 	uint32 getVao() const { return m_VAO; }
-	std::vector<uint32> getVbos() const { return m_VBOs; }
+	const std::vector<uint32>& getVbos() const { return m_VBOs; }
 	uint32 getBlockCount() const { return m_blockCount; };
 
 	//Setters

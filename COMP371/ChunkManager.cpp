@@ -55,6 +55,9 @@ DWORD WINAPI cmRoutine(LPVOID p)
 
 void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
+	// Unload out of range chunks
+	unloadChunks(currentChunk);
+
 	float32 flooredX = currentChunk.x, flooredZ = currentChunk.z;
 	float32 currentX = flooredX, currentZ = flooredZ;
 	std::vector<glm::vec3> chunksToLoad;
@@ -290,6 +293,42 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setBlockCount(chunkData.size());
 	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
 	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
+}
+
+#if _MSVC_LANG < 201402
+	#error Program requires C++14 to operate correctly 
+#endif
+
+void ChunkManager::unloadChunks(const glm::vec3& currentChunkPos) {
+
+	for (auto iter = cmLoadedChunks.begin(); iter != cmLoadedChunks.end();) {
+		Chunk& chunk = (*iter).second;
+
+		float32 dx = currentChunkPos.x - chunk.getPosition().x;
+		float32 dz = currentChunkPos.z - chunk.getPosition().z;
+
+		// Compute the square distances to avoid using sqrt since it is alot more computationally intensive
+		float32 distanceSquared = (dx * dx) + (dz * dz);
+		float32 radiusSquared = LOADINGRADIUS * LOADINGRADIUS * CHUNKWIDTH * CHUNKWIDTH;
+
+		if (distanceSquared > radiusSquared) {
+
+			// Delete vbos
+			const std::vector<uint32>& vbos = chunk.getVbos();
+			glDeleteBuffers(vbos.size(), vbos.data());
+
+			// Delete vao
+			uint32 vao = chunk.getVao();
+			glDeleteVertexArrays(1, &vao);
+
+			// With C++14 the order of the elements remain constant after erasing so we can do this in the loop
+			iter = cmLoadedChunks.erase(iter);
+		}
+		else {
+			iter++;
+		}
+
+	}
 }
 
 ChunkManager* ChunkManager::sChunkManager = nullptr;
