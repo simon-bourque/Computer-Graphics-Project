@@ -47,6 +47,12 @@ Texture* chunkTexture = nullptr;
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
 
+//#define COMPILE_DRAW_NORMALS // Uncomment me if you want to render normals
+
+#ifdef COMPILE_DRAW_NORMALS
+ShaderProgram* chunkNormalsShader = nullptr;
+#endif
+
 int main() {
 
 	try {
@@ -56,6 +62,12 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
+
+#ifdef COMPILE_DRAW_NORMALS
+		chunkNormalsShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_normals_frag.glsl", "chunk_normals_geo.glsl");
+		//glLineWidth(3.0f);
+#endif
+
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
 
 		initTestCube();
@@ -179,6 +191,11 @@ void update(float32 deltaSeconds) {
 void render() {
 	RenderingContext::get()->prepareFrame();
 
+#ifdef COMPILE_DRAW_NORMALS
+	chunkNormalsShader->use();
+	chunkNormalsShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+#endif
+
 	// Render chunks
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
@@ -187,6 +204,12 @@ void render() {
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+
+#ifdef COMPILE_DRAW_NORMALS
+		chunkNormalsShader->use();
+		glDrawElementsInstanced(GL_POINTS, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+		chunkShader->use();
+#endif
 	}
 
 	// Render test cube

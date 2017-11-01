@@ -5,14 +5,14 @@
 namespace cube {
 	extern const uint32 numVertices = 24;
 	extern const float32 vertices[numVertices * 3] = {
-		-0.5f, -0.5f, 0.5f, // Front
+		0.5f, 0.5f, 0.5f, // Front
 		-0.5f, 0.5f, 0.5f,
-		0.5f, 0.5f, 0.5f,
+		-0.5f, -0.5f, 0.5f,
 		0.5f, -0.5f, 0.5f,
 
-		-0.5f, 0.5f, 0.5f, // Top
+		0.5f, 0.5f, -0.5f, // Top
 		-0.5f, 0.5f, -0.5f,
-		0.5f, 0.5f, -0.5f,
+		-0.5f, 0.5f, 0.5f,
 		0.5f, 0.5f, 0.5f,
 
 		-0.5f, -0.5f, -0.5f, // Back
@@ -30,18 +30,18 @@ namespace cube {
 		-0.5f, 0.5f, -0.5f,
 		-0.5f, -0.5f, -0.5f,
 
-		0.5f, -0.5f, 0.5f, // Right
+		0.5f, 0.5f, -0.5f, // Right
 		0.5f, 0.5f, 0.5f,
-		0.5f, 0.5f, -0.5f,
+		0.5f, -0.5f, 0.5f,
 		0.5f, -0.5f, -0.5f
 
 	};
 
 	extern const uint32 numUvCoords = 24;
 	extern const float32 uvCoords[numUvCoords * 2] = {
-		1.0f,1.0f,
-		1.0f,0.0f,
 		0.0f,0.0f,
+		1.0f,0.0f,
+		1.0f,1.0f,
 		0.0f,1.0f,
 
 		1.0f,1.0f,
@@ -64,9 +64,9 @@ namespace cube {
 		0.0f,0.0f,
 		0.0f,1.0f,
 
-		1.0f,1.0f,
-		1.0f,0.0f,
 		0.0f,0.0f,
+		1.0f,0.0f,
+		1.0f,1.0f,
 		0.0f,1.0f,
 		
 	};
@@ -93,15 +93,15 @@ namespace cube {
 		0.0f,-1.0f,0.0f,
 		0.0f,-1.0f,0.0f,
 
-		1.0f,0.0f,0.0f, // Left
-		1.0f,0.0f,0.0f,
-		1.0f,0.0f,0.0f,
-		1.0f,0.0f,0.0f,
+		-1.0f,0.0f,0.0f, // Left
+		-1.0f,0.0f,0.0f,
+		-1.0f,0.0f,0.0f,
+		-1.0f,0.0f,0.0f,
 
-		-1.0f,0.0f,0.0f, // Right
-		-1.0f,0.0f,0.0f,
-		-1.0f,0.0f,0.0f,
-		-1.0f,0.0f,0.0f,
+		1.0f,0.0f,0.0f, // Right
+		1.0f,0.0f,0.0f,
+		1.0f,0.0f,0.0f,
+		1.0f,0.0f,0.0f,
 	};
 
 	extern const uint32 numIndices = 36;

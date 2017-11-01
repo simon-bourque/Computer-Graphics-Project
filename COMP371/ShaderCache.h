@@ -14,9 +14,12 @@ private:
 
 	ShaderCache();
 	virtual ~ShaderCache();
+
+	GLint compileShader(const std::string& source, GLenum type) const;
 public:
 	
 	ShaderProgram* loadShaderProgram(const std::string& name, const std::string& vertPath, const std::string& fragPath);
+	ShaderProgram* loadShaderProgram(const std::string& name, const std::string& vertPath, const std::string& fragPath, const std::string& geoPath);
 	ShaderProgram* getShaderProgram(const std::string& name) { return m_shaders[name]; };
 };
 
