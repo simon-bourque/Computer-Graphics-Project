@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "FreeCameraController.h"
+#include "Player.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -46,6 +47,7 @@ Texture* chunkTexture = nullptr;
 
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
+Player* gPlayer;
 
 //#define COMPILE_DRAW_NORMALS // Uncomment me if you want to render normals
 
@@ -103,6 +105,10 @@ int main() {
 	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
 	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
 
+	// Player
+	gPlayer = new Player();
+	gPlayer->transform = &(RenderingContext::get()->camera.transform);
+
 	// Start loop
 	uint32 frames = 0;
 	float64 counter = 0;
@@ -133,6 +139,7 @@ int main() {
 	}
 
 	delete gCameraController;
+	delete gPlayer;
 
 	RenderingContext::destroy();
 	
@@ -171,9 +178,10 @@ void update(float32 deltaSeconds) {
 	// Update logic...
 	gCameraController->update(deltaSeconds);
 
-	const Transform& playerTransform = RenderingContext::get()->camera.transform;
-	glm::vec3 playerPos(playerTransform.xPos, playerTransform.yPos, playerTransform.zPos);
-	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(playerPos);
+	gPlayer->update(deltaSeconds);
+
+	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
+	std::cout << "currentChunk at (" << currentChunk.x << "," << currentChunk.y << "," << currentChunk.z << ")" << std::endl;
 
 	// Spooky hack lol
 	static glm::vec3 lastChunk(currentChunk.x + 1.0f, currentChunk.y, currentChunk.z);
@@ -185,7 +193,7 @@ void update(float32 deltaSeconds) {
 	ChunkManager::instance()->uploadQueuedChunk();
 
 	chunkShader->use();
-	chunkShader->setUniform("viewPos", playerPos);
+	chunkShader->setUniform("viewPos", gPlayer->getPosition());
 }
 
 void render() {

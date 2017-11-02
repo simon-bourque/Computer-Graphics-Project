@@ -135,11 +135,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FreeCameraController.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelCache.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderingContext.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderCache.cpp" />
@@ -153,10 +155,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="FreeCameraController.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="RenderingContext.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderCache.h" />
