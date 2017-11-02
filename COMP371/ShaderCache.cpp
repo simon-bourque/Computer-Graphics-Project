@@ -4,6 +4,7 @@
 #include <sstream>
 
 std::string loadShaderText(const std::string& path);
+std::string getShaderTypeString(GLenum type);
 
 ShaderCache::ShaderCache() {}
 
@@ -16,48 +17,8 @@ ShaderCache::~ShaderCache() {
 }
 
 ShaderProgram* ShaderCache::loadShaderProgram(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
-	GLint vertShader = glCreateShader(GL_VERTEX_SHADER);
-	GLint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Compile vertex shader
-	std::string vertSrc = loadShaderText(vertPath);
-	const GLchar* srcCString = vertSrc.c_str();
-
-	glShaderSource(vertShader, 1, &srcCString, nullptr);
-	glCompileShader(vertShader);
-
-	GLint status = 0;
-	glGetShaderiv(vertShader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE) {
-		std::string msg("Failed to compile vertex shader: ");
-
-		GLchar log[1024];
-		GLsizei charsWritten = 0;
-		glGetShaderInfoLog(vertShader, 1024, &charsWritten, log);
-
-		msg.append(log);
-		throw std::runtime_error(msg);
-	}
-
-	// Compile fragment shader
-	std::string fragSrc = loadShaderText(fragPath);
-	srcCString = fragSrc.c_str();
-
-	glShaderSource(fragShader, 1, &srcCString, nullptr);
-	glCompileShader(fragShader);
-
-	status = 0;
-	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE) {
-		std::string msg("Failed to compile fragment shader: ");
-
-		GLchar log[1024];
-		GLsizei charsWritten = 0;
-		glGetShaderInfoLog(fragShader, 1024, &charsWritten, log);
-
-		msg.append(log);
-		throw std::runtime_error(msg);
-	}
+	GLint vertShader = compileShader(loadShaderText(vertPath), GL_VERTEX_SHADER);
+	GLint fragShader = compileShader(loadShaderText(fragPath), GL_FRAGMENT_SHADER);
 
 	// Link shader program
 	GLuint shaderProgram = glCreateProgram();
@@ -65,7 +26,7 @@ ShaderProgram* ShaderCache::loadShaderProgram(const std::string& name, const std
 	glAttachShader(shaderProgram, fragShader);
 	glLinkProgram(shaderProgram);
 
-	status = 0;
+	GLint status = 0;
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE) {
 		std::string msg("Failed to link shader program: ");
@@ -89,6 +50,68 @@ ShaderProgram* ShaderCache::loadShaderProgram(const std::string& name, const std
 	return m_shaders[name];
 }
 
+ShaderProgram* ShaderCache::loadShaderProgram(const std::string& name, const std::string& vertPath, const std::string& fragPath, const std::string& geoPath) {
+	GLint vertShader = compileShader(loadShaderText(vertPath), GL_VERTEX_SHADER);
+	GLint geoShader = compileShader(loadShaderText(geoPath), GL_GEOMETRY_SHADER);
+	GLint fragShader = compileShader(loadShaderText(fragPath), GL_FRAGMENT_SHADER);
+
+	// Link shader program
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertShader);
+	glAttachShader(shaderProgram, geoShader);
+	glAttachShader(shaderProgram, fragShader);
+	glLinkProgram(shaderProgram);
+
+	GLint status = 0;
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
+	if (status == GL_FALSE) {
+		std::string msg("Failed to link shader program: ");
+
+		GLchar log[1024];
+		GLsizei charsWritten = 0;
+		glGetProgramInfoLog(shaderProgram, 1024, &charsWritten, log);
+
+		msg.append(log);
+		throw std::runtime_error(msg);
+	}
+
+	// Clean up.
+	glDetachShader(shaderProgram, vertShader);
+	glDetachShader(shaderProgram, geoShader);
+	glDetachShader(shaderProgram, fragShader);
+	glDeleteShader(vertShader);
+	glDeleteShader(geoShader);
+	glDeleteShader(fragShader);
+
+	m_shaders[name] = new ShaderProgram(shaderProgram);
+
+	return m_shaders[name];
+}
+
+GLint ShaderCache::compileShader(const std::string& source, GLenum type) const {
+	// Compile shader
+	const GLchar* srcCString = source.c_str();
+	GLint shader = glCreateShader(type);
+
+	glShaderSource(shader, 1, &srcCString, nullptr);
+	glCompileShader(shader);
+
+	GLint status = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE) {
+		std::string msg("Failed to compile " + getShaderTypeString(type) + " shader: ");
+
+		GLchar log[1024];
+		GLsizei charsWritten = 0;
+		glGetShaderInfoLog(shader, 1024, &charsWritten, log);
+
+		msg.append(log);
+		throw std::runtime_error(msg);
+	}
+
+	return shader;
+}
+
 std::string loadShaderText(const std::string& path) {
 	std::ifstream input(path);
 
@@ -103,4 +126,17 @@ std::string loadShaderText(const std::string& path) {
 	input.close();
 
 	return ss.str();
+}
+
+std::string getShaderTypeString(GLenum type) {
+	switch (type) {
+	case GL_VERTEX_SHADER:
+		return "vertex";
+	case GL_FRAGMENT_SHADER:
+		return "fragment";
+	case GL_GEOMETRY_SHADER:
+		return "geometry";
+	default:
+		return "unknown";
+	}
 }

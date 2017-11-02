@@ -155,10 +155,22 @@
     <None Include="chunk_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="skybox_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_vert.glsl">
+	  <Filter>Shader Files</Filter>
+	</None>
     <None Include="shadowmap_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shadowmap_vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="chunk_normals_geo.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="chunk_normals_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
