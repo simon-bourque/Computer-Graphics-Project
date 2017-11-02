@@ -85,6 +85,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Graphics\Lighting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -140,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Graphics\Lighting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -141,6 +141,7 @@
     <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
     <ClCompile Include="LightSource.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />

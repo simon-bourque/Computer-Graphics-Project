@@ -17,6 +17,7 @@
 #include "RenderingContext.h"
 
 #include "LightSource.h"
+#include "ShadowMap.h"
 
 #include "ModelCache.h"
 #include "Model.h"
@@ -39,7 +40,10 @@ ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
+int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
 glm::vec3 playerPosition(0, 160, 2);
+LightSource* sun = nullptr;
+ShadowMap* shadowMap = nullptr;
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
@@ -96,12 +100,9 @@ int main() {
 
 	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	LightSource sun(lightDirection, lightColor, 0.5f, 0.25f);
-	chunkShader->use();
-	chunkShader->setUniform("lightColor", sun.getColor());
-	chunkShader->setUniform("lightDirection", sun.getDirection());
-	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
-	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
+
+	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.25f);
+	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
 
 	// Start loop
 	uint32 frames = 0;
@@ -162,7 +163,10 @@ GLFWwindow* initGLFW() {
 	glfwSwapInterval(1);
 
 	
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
+		glViewport(0, 0, width, height); 
+		shadowMap->updateSize(width, height);
+	});
 
 	return window;
 }
@@ -196,11 +200,22 @@ void render() {
 	chunkNormalsShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 #endif
 
-	// Render chunks
+	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	
+	// First Pass (Shadows)
+	RenderingContext::get()->shaderCache.getShaderProgram("sm_shader")->use();
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
+	glClear(GL_DEPTH_BUFFER_BIT);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+
+	// Second Pass (Render chunks)
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	chunkTexture->bind(Texture::UNIT_0);
-	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
