@@ -73,5 +73,6 @@ private:
 	static ChunkManager* sChunkManager;
 
 	void uploadChunk(const glm::vec3& chunkPosition, const std::vector<Block>& chunkData);
+	void unloadChunks(const glm::vec3& currentChunkPos);
 };
 
