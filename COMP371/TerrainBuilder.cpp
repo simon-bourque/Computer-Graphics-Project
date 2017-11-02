@@ -7,6 +7,13 @@ TerrainBuilder::TerrainBuilder(int seed)
 	noiseGenerator.SetNoiseType(FastNoise::PerlinFractal);
 	noiseGenerator.SetFrequency(0.005);
 	noiseGenerator.SetFractalOctaves(5);
+
+	TreeNoiseGenerator.SetSeed(seed);
+	TreeNoiseGenerator.SetNoiseType(FastNoise::SimplexFractal);
+	TreeNoiseGenerator.SetFrequency(0.005);
+	TreeNoiseGenerator.SetFractalOctaves(2);
+
+	fillClosestPrimes(closestPrimes);
 }
 
 TerrainBuilder::~TerrainBuilder()
@@ -97,7 +104,6 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			else
 				upBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(0, 0, 1) );
 
-
 			// Get maximum height difference bw current block and four adjacent blocks
 			float heightDifference = currBlockPos.y - leftBlockPos.y;
 			heightDifference = (heightDifference > currBlockPos.y - rightBlockPos.y) ? heightDifference : currBlockPos.y - rightBlockPos.y;
@@ -107,6 +113,23 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			// Duplicate the current block vertically to fill gaps
 			if (heightDifference > 1.0f)
 				duplicateBlockVertically(chunkBlocks[index], int(nearbyint(heightDifference)), chunkBlocks);
+
+			// Load Tree
+			if (chunkBlocks[index].getBlockType() == BlockType::GRASS)
+			{
+
+				// Trees are only placed if their positions are at prime numbers (number depends on noise)
+				int noise = ((TreeNoiseGenerator.GetNoise(currBlockPos.x, currBlockPos.z) + 1) * 0.5f * 20) +5 ;
+				if ((int)(currBlockPos.x+0) % closestPrimes[noise] == 0 && (int)(currBlockPos.z+0) % closestPrimes[noise] == 0 &&  currBlockPos.z != 0 && currBlockPos.x != 0)
+					if (((int)leftBlockPos.y == (int)rightBlockPos.y) && ((int)upBlockPos.y == (int)downBlockPos.y) && downBlockPos.y == (int)currBlockPos.y&& rightBlockPos.y == (int)currBlockPos.y)
+					{	
+						// Depending on elevation make different kinds of trees
+						if(currBlockPos.y < 0.6*ChunkManager::CHUNKHEIGHT)
+							makeUglyTree(chunkBlocks[index], noise % 5 + 3, chunkBlocks);
+						else
+							makeUglyChristmasTree(chunkBlocks[index], noise % 3 + 4, chunkBlocks);
+					}
+			}
 
 		}
 	}
@@ -130,12 +153,156 @@ glm::vec3 TerrainBuilder::getHeightmapPosition(glm::vec3 xzPosition)
 	return xzPosition;
 }
 
+void TerrainBuilder::makeTrunk(Block rootBlock, int trunkWidth, int trunkHeight, vector<Block>& chunkBlocks)
+{
+	// Make the Log
+	for (int h = 1; h <= trunkHeight; h++)
+		for (int c = -trunkWidth; c <= trunkWidth; c++)
+			for (int r = -trunkWidth; r <= trunkWidth; r++)
+			{
+				// no use drawing the blocks inside the trunk since they're hidden
+				if(r==-trunkWidth || r == trunkWidth || c == -trunkWidth || c == trunkWidth)
+				{
+					glm::vec3 newBlockPos = rootBlock.getPosition() + glm::vec3(c, h, r);
+					Block newBlock(newBlockPos, BlockType::LOG);
+					chunkBlocks.push_back(newBlock);
+				}
+			}
+}
+
+void TerrainBuilder::makeBlock(glm::vec3 rootBlock, int blockWidth, int blockHeight, vector<Block>& chunkBlocks, bool centeredAroundRoot)
+{
+	// Make the Block
+	for (int h = 0; h <= blockHeight; h++)
+		for (int c = -blockWidth; c <= blockWidth; c++)
+			for (int r = -blockWidth; r <= blockWidth; r++)
+			{
+				if (r == -blockWidth || r == blockWidth || c == -blockWidth || c == blockWidth || h == -blockHeight|| h == blockHeight)
+				{
+					glm::vec3 newBlockPos = rootBlock + glm::vec3(c, h, r);
+					Block newBlock(newBlockPos, BlockType::LEAVES);
+					chunkBlocks.push_back(newBlock);
+				}
+			}
+}
+
+void TerrainBuilder::makeUglyTree(Block rootBlock, int trunkHeight, vector<Block>& chunkBlocks)
+{
+	// Make the Log
+	makeTrunk(rootBlock, 0, trunkHeight, chunkBlocks);
+
+	makeBlock(rootBlock.getPosition() + glm::vec3(0,trunkHeight,0), 2, 3, chunkBlocks);
+
+}
+
+void TerrainBuilder::makeUglyChristmasTree(Block rootBlock, int trunkHeight, vector<Block>& chunkBlocks)
+{
+	// Make the Log
+	int trunksize = trunkHeight > 5 ? 1 : 0;
+
+	makeTrunk(rootBlock, trunksize, trunkHeight +2, chunkBlocks);
+
+	int leafBlockSize = trunkHeight;
+	int lastLeafRad;
+
+	for (int h = 0; h < leafBlockSize; h+=2)
+	{
+		// Every height level, make a smaller xz leaf plane
+		int leafRad =((leafBlockSize*2 - h*2 + h%5)/2);
+		glm::vec3 originPos = rootBlock.getPosition() + glm::vec3(0, trunkHeight/2 + 1, 0);
+		lastLeafRad = leafRad;
+
+		//  Make spaced out middle part (one layer leaves, one layer logs)
+		for (int c =  -leafRad; c <= leafRad; c++)
+		{
+			for (int r = -(leafRad - abs(c)); r <= (leafRad - abs(c)); r++)
+			{
+				glm::vec3 newBlockPos = originPos + glm::vec3(c, h, r);
+				Block newBlock(newBlockPos, BlockType::LEAVES);
+				chunkBlocks.push_back(newBlock);
+
+				// Add small '+' shapes log every other layer
+				if(r == 0 || c == 0)
+				{
+					newBlockPos = originPos + glm::vec3(c, h + 1, r);
+
+					// if trunkHeight > 5 then you will have a large trunk with 3x3 layers
+					if (r > -2 && c > -2 && r < 2 && c < 2 && trunkHeight >5 ) {
+							Block newBlock2(newBlockPos, BlockType::LOG);
+							chunkBlocks.push_back(newBlock2);
+					}
+				}
+
+			}
+		}
+
+		// Add a pyramid top to these christmas trees
+		for (int h = 0; h <= lastLeafRad; h++)
+		{
+			// Every height level, make a smaller xz leaf plane
+			int leafRad = lastLeafRad - h -2;
+			glm::vec3 originPos = rootBlock.getPosition() + glm::vec3(0, trunkHeight / 2 + 1 + leafBlockSize, 0);
+
+			//  Make spaced out middle part one layer leaves, one layer log
+			for (int c = -leafRad; c <= leafRad; c++)
+			{
+				for (int r = -(leafRad - abs(c)); r <= (leafRad - abs(c)); r++)
+				{
+					// Draw a diamond perimeter of blocks at each layer, no need to draw hidden blocks
+					if (r == -leafRad || r == leafRad || c == -leafRad || c == leafRad || h == 0)
+					{
+						glm::vec3 newBlockPos = originPos + glm::vec3(c, h, r);
+						Block newBlock(newBlockPos, BlockType::LEAVES);
+						chunkBlocks.push_back(newBlock);
+					}
+
+				}
+			}
+		}
+	}
+}
+
+bool TerrainBuilder::isPrime(int n)
+{
+	if (n <= 1)
+		return false;
+	else if (n <= 3)
+		return true;
+	else if (n % 2 == 0 || n % 3 == 0)
+		return false;
+	int i = 5;
+	while(i*i <= n)
+	{
+		if (n % i == 0 || n % (i + 2) == 0)
+			return false;
+		i += 6;
+	}
+	return true;
+}
+
+/**
+ *  Fills an integer array where each index points to the closest prime larger than the index (up to prime 97)
+ */
+void TerrainBuilder::fillClosestPrimes(int* closestPrimes)
+{
+
+	int size = 101;
+	closestPrimes[size -1] = 97;
+
+	for(int i = size -2; i >= 0; i--)
+	{
+		if (isPrime(i))
+			closestPrimes[i] = i;
+		else
+			closestPrimes[i] = closestPrimes[i+1];
+	}
+}
+
 BlockType TerrainBuilder::getBlockType(const float elevation)
 {
 	int maxHeight = ChunkManager::CHUNKHEIGHT;
 	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
 	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;
-	else if (elevation < 0.55f * maxHeight) return BlockType::GRASS;
-	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS; // Can later be changed to like mountain-type blocks
+	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS;
 	else  return BlockType::SNOW;
 }
