@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FreeCameraController.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelCache.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
+    <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -148,12 +150,14 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FreeCameraController.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
     <ClInclude Include="RenderingContext.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
+    <ClInclude Include="LightSource.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />
@@ -166,6 +170,8 @@
   <ItemGroup>
     <None Include="chunk_frag.glsl" />
     <None Include="chunk_vert.glsl" />
+    <None Include="shadowmap_frag.glsl" />
+    <None Include="shadowmap_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
     <None Include="test_cube_vert.glsl" />
   </ItemGroup>

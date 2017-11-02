@@ -16,6 +16,8 @@
 
 #include "RenderingContext.h"
 
+#include "LightSource.h"
+
 #include "ModelCache.h"
 #include "Model.h"
 
@@ -82,6 +84,15 @@ int main() {
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
 
+	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
+	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+	LightSource sun(lightDirection, lightColor, 0.5f, 0.25f);
+	chunkShader->use();
+	chunkShader->setUniform("lightColor", sun.getColor());
+	chunkShader->setUniform("lightDirection", sun.getDirection());
+	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
+	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
+
 	// Start loop
 	uint32 frames = 0;
 	float64 counter = 0;
@@ -127,6 +138,8 @@ GLFWwindow* initGLFW() {
 	}
 
 	glfwDefaultWindowHints();
+	// 8x MSAA
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
 
@@ -140,9 +153,6 @@ GLFWwindow* initGLFW() {
 
 	
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
-
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) -> void { gCameraController->onKey(key, action); });
-	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) -> void { gCameraController->onMouseButton(button, action); });
 
 	return window;
 }
@@ -163,6 +173,9 @@ void update(float32 deltaSeconds) {
 		lastChunk = currentChunk;
 	}
 	ChunkManager::instance()->uploadQueuedChunk();
+
+	chunkShader->use();
+	chunkShader->setUniform("viewPos", playerPos);
 }
 
 void render() {
