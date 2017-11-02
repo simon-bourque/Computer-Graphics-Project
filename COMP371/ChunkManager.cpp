@@ -193,6 +193,21 @@ glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
 	return glm::vec3(flooredX, 0, flooredZ);
 }
 
+
+Chunk ChunkManager::getChunkHandle(glm::vec3 currentChunk)
+{
+	int64 chunkPosition = encodePosition(currentChunk.x, currentChunk.z);
+	//need to figure out loading issue..
+	Chunk chunky;
+	if (cmLoadedChunks.size() > 10)
+	{
+		chunky = cmLoadedChunks.at(chunkPosition);
+		std::cout << "chunky at (" << chunky.getPosition().x << "," << chunky.getPosition().y << "," << chunky.getPosition().z << ")" << std::endl;
+	}
+
+	return chunky;
+}
+
 ChunkManager::~ChunkManager()
 {
 	CloseHandle(cmSemaphore);

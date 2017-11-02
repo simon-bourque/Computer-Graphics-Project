@@ -182,6 +182,7 @@ void update(float32 deltaSeconds) {
 
 	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
 	std::cout << "currentChunk at (" << currentChunk.x << "," << currentChunk.y << "," << currentChunk.z << ")" << std::endl;
+	ChunkManager::instance()->getChunkHandle(currentChunk);
 
 	// Spooky hack lol
 	static glm::vec3 lastChunk(currentChunk.x + 1.0f, currentChunk.y, currentChunk.z);
