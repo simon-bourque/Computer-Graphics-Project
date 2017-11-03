@@ -75,13 +75,13 @@ WaterRenderer::WaterRenderer() :
 WaterRenderer::~WaterRenderer() {
 	glDeleteBuffers(m_vbos.size(), m_vbos.data());
 	glDeleteVertexArrays(1, &m_vao);
-	glDeleteTextures(1, &m_refractionDepthTexture);
+	glDeleteRenderbuffers(1, &m_refractionDepthRenderBuffer);
 	glDeleteTextures(1, &m_refractionColorTexture);
 	glDeleteFramebuffers(1, &m_refractionFBO);
 }
 
 void WaterRenderer::resizeFBO(uint32 width, uint32 height) {
-	glDeleteTextures(1, &m_refractionDepthTexture);
+	glDeleteRenderbuffers(1, &m_refractionDepthRenderBuffer);
 	glDeleteTextures(1, &m_refractionColorTexture);
 	glDeleteFramebuffers(1, &m_refractionFBO);
 	buildFBO(width, height);
@@ -100,21 +100,16 @@ void WaterRenderer::buildFBO(uint32 width, uint32 height) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Depth
-	glGenTextures(1, &m_refractionDepthTexture);
-	glBindTexture(GL_TEXTURE_2D, m_refractionDepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glGenRenderbuffers(1, &m_refractionDepthRenderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_refractionDepthRenderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
 
 	glGenFramebuffers(1, &m_refractionFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_refractionFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_refractionColorTexture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_refractionDepthTexture, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_refractionDepthRenderBuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

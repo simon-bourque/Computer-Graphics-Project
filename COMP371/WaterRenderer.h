@@ -29,7 +29,7 @@ private:
 	Texture* m_waterDuDv;
 
 	uint32 m_refractionFBO;
-	uint32 m_refractionDepthTexture;
+	uint32 m_refractionDepthRenderBuffer;
 	uint32 m_refractionColorTexture;
 	
 	WaterRenderer();
