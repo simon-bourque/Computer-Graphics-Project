@@ -53,7 +53,7 @@ void main() {
 
 	
 	// Calculate clip
-	gl_ClipDistance[0] = dot(worldPosition, vec4(0, -1, 0, waterPlaneHeight));
+	gl_ClipDistance[0] = dot(worldPosition, vec4(0, -1, 0, waterPlaneHeight + 0.5));
 
 	gl_Position = vpMatrix * worldPosition;
 }
