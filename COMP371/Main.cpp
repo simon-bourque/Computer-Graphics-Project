@@ -78,6 +78,7 @@ int main() {
 		initTestCube();
 
 		WaterRenderer::init();
+		WaterRenderer::get()->buildFBO(WIDTH, HEIGHT);
 	}
 	catch (std::runtime_error& ex) {
 		std::cout << ex.what() << std::endl;
