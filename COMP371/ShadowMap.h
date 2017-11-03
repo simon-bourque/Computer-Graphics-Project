@@ -14,14 +14,15 @@ public:
 
 	uint32 getFbo() { return m_fbo; }
 	glm::mat4 getMvp() { return m_MVP; }
+	uint32 getTexture() { return m_texture; }
 
 	~ShadowMap();
 private:
-	void buildBuffer(int32 width, int32 height);
+	void buildBuffer();
 
 	//Texture dimensions
-	uint32 m_width;
-	uint32 m_height;
+	int32 m_width;
+	int32 m_height;
 
 	glm::mat4 m_MVP;
 

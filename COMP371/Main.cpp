@@ -43,10 +43,12 @@ Texture* cubeTexture = nullptr;
 int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
 glm::vec3 playerPosition(0, 160, 0);
 LightSource* sun = nullptr;
-glm::vec3 lightDirection(-0.25f, -0.5f, 0.0f);
+ShadowMap* shadowMap = nullptr;
+glm::vec3 lightDirection(0.0f, -0.1f, -0.5f);
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
+ShaderProgram* smShader = nullptr;
 
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
@@ -66,6 +68,7 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
+		smShader = RenderingContext::get()->shaderCache.loadShaderProgram("sm_shader", "shadowmap_vert.glsl", "shadowmap_frag.glsl");
 
 #ifdef COMPILE_DRAW_NORMALS
 		chunkNormalsShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_normals_frag.glsl", "chunk_normals_geo.glsl");
@@ -101,6 +104,7 @@ int main() {
 	glm::vec3 lightColor(0.9f, 0.9f, 0.9f);
 
 	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.01f);
+	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
 
 	// Start loop
 	uint32 frames = 0;
@@ -132,6 +136,7 @@ int main() {
 	}
 
 	delete gCameraController;
+	delete shadowMap;
 	delete sun;
 
 	RenderingContext::destroy();
@@ -164,6 +169,7 @@ GLFWwindow* initGLFW() {
 	
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
 		glViewport(0, 0, width, height); 
+		shadowMap->updateSize(width, height);
 	});
 
 	return window;
@@ -199,12 +205,31 @@ void render() {
 #endif
 
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	shadowMap->updateMvp(lightDirection);
+
+	//First Pass (Shadows)
+	glCullFace(GL_FRONT);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
+	smShader->use();
+	smShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(4.0f, 2.0f);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glCullFace(GL_BACK);
 
 	// Second Pass (Render chunks)
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
 	chunkTexture->bind(Texture::UNIT_0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
