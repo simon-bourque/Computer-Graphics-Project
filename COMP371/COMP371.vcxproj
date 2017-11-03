@@ -150,6 +150,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="TerrainBuilder.cpp" />
+    <ClCompile Include="WaterRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="TerrainBuilder.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="WaterRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="chunk_frag.glsl" />
@@ -180,6 +182,8 @@
     <None Include="shadowmap_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
     <None Include="test_cube_vert.glsl" />
+    <None Include="water_frag.glsl" />
+    <None Include="water_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

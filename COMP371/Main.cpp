@@ -28,6 +28,8 @@
 
 #include "FreeCameraController.h"
 
+#include "WaterRenderer.h"
+
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
@@ -45,6 +47,9 @@ ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
 
 GLFWwindow* gWindow = nullptr;
+uint32 WIDTH = 640;
+uint32 HEIGHT = 480;
+
 FreeCameraController* gCameraController;
 
 //#define COMPILE_DRAW_NORMALS // Uncomment me if you want to render normals
@@ -71,6 +76,8 @@ int main() {
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
 
 		initTestCube();
+
+		WaterRenderer::init();
 	}
 	catch (std::runtime_error& ex) {
 		std::cout << ex.what() << std::endl;
@@ -134,6 +141,7 @@ int main() {
 
 	delete gCameraController;
 
+	WaterRenderer::destroy();
 	RenderingContext::destroy();
 	
 	glfwTerminate();
@@ -151,7 +159,7 @@ GLFWwindow* initGLFW() {
 	// 8x MSAA
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Final Project", nullptr, nullptr);
 
 	if (!window) {
 		glfwTerminate();
@@ -162,7 +170,12 @@ GLFWwindow* initGLFW() {
 	glfwSwapInterval(1);
 
 	
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { 
+		glViewport(0, 0, width, height);
+		WaterRenderer::get()->resizeFBO(width, height);
+		WIDTH = width;
+		HEIGHT = height;
+	});
 
 	return window;
 }
@@ -186,6 +199,12 @@ void update(float32 deltaSeconds) {
 
 	chunkShader->use();
 	chunkShader->setUniform("viewPos", playerPos);
+
+	static float32 panner = 0;
+	panner += 0.05 * deltaSeconds;
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->use();
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("viewPos", playerPos);
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("panner", panner);
 }
 
 void render() {
@@ -196,11 +215,25 @@ void render() {
 	chunkNormalsShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 #endif
 
-	// Render chunks
+	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	
+	// Render to refraction texture
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
 	chunkTexture->bind(Texture::UNIT_0);
-	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CLIP_DISTANCE0);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+	glDisable(GL_CLIP_DISTANCE0);
+
+	
+	// Render chunks
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
@@ -212,6 +245,14 @@ void render() {
 #endif
 	}
 
+	// Render water
+	for (const auto& chunk : chunks) {
+		glm::vec3 pos = chunk.second.getPosition();
+
+		// Render water
+		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
+	}
+
 	// Render test cube
 	cubeShader->use();
 	
@@ -221,6 +262,9 @@ void render() {
 	cubeShader->setUniform("color", glm::vec3(1, 0, 0));
 	
 	glDrawElements(GL_TRIANGLES, cubeModel->getCount(), GL_UNSIGNED_INT, nullptr);
+
+	// Render water
+	//gWater->render();
 }
 
 void initTestCube() {

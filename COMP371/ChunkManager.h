@@ -61,7 +61,7 @@ private:
 	std::mutex cmOutMutex;
 
 	//Loading Chunks
-	static const uint32 LOADINGRADIUS = 4;
+	static const uint32 LOADINGRADIUS = 16;
 	std::unordered_map<int64, Chunk> cmLoadingChunks;
 	std::unordered_map<int64, Chunk> cmLoadedChunks;
 

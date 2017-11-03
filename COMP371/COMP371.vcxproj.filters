@@ -85,6 +85,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="WaterRenderer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -141,6 +144,9 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="WaterRenderer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test_cube_vert.glsl">
@@ -165,6 +171,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_normals_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
