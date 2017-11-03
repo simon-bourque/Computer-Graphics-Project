@@ -28,6 +28,7 @@ public:
 	static ChunkManager* instance();
 	HANDLE getSemaphoreHandle() const { return cmSemaphore; }
 	glm::vec3 getCurrentChunk(glm::vec3 playerPosition) const;
+	uint32 getLoadingRadius() { return LOADINGRADIUS; }
 
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);
@@ -40,7 +41,7 @@ public:
 	friend DWORD WINAPI cmRoutine(LPVOID p);
 
 	//Chunk Dimensions
-	static const uint32 CHUNKWIDTH = 32;
+	static const int32 CHUNKWIDTH = 32;
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
 
@@ -61,7 +62,7 @@ private:
 	std::mutex cmOutMutex;
 
 	//Loading Chunks
-	static const uint32 LOADINGRADIUS = 4;
+	static const int32 LOADINGRADIUS = 8;
 	std::unordered_map<int64, Chunk> cmLoadingChunks;
 	std::unordered_map<int64, Chunk> cmLoadedChunks;
 

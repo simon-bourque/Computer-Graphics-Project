@@ -41,9 +41,9 @@ Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
 int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
-glm::vec3 playerPosition(0, 160, 2);
+glm::vec3 playerPosition(0, 160, 0);
 LightSource* sun = nullptr;
-ShadowMap* shadowMap = nullptr;
+glm::vec3 lightDirection(-0.25f, -0.5f, 0.0f);
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
@@ -84,7 +84,7 @@ int main() {
 
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
-	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
+	RenderingContext::get()->camera.transform.translateLocal(0,160,0);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Load face data for shader
@@ -98,11 +98,9 @@ int main() {
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
 
-	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
-	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+	glm::vec3 lightColor(0.9f, 0.9f, 0.9f);
 
-	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.25f);
-	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
+	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.01f);
 
 	// Start loop
 	uint32 frames = 0;
@@ -134,6 +132,7 @@ int main() {
 	}
 
 	delete gCameraController;
+	delete sun;
 
 	RenderingContext::destroy();
 	
@@ -165,7 +164,6 @@ GLFWwindow* initGLFW() {
 	
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
 		glViewport(0, 0, width, height); 
-		shadowMap->updateSize(width, height);
 	});
 
 	return window;
@@ -201,15 +199,6 @@ void render() {
 #endif
 
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
-	
-	// First Pass (Shadows)
-	RenderingContext::get()->shaderCache.getShaderProgram("sm_shader")->use();
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
-	glClear(GL_DEPTH_BUFFER_BIT);
-	for (const auto& chunk : chunks) {
-		glBindVertexArray(chunk.second.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
-	}
 
 	// Second Pass (Render chunks)
 	chunkShader->use();

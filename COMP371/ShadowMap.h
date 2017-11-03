@@ -9,7 +9,6 @@ class ShadowMap
 public:
 	ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection);
 
-	void initShaders();
 	void updateSize(int32 width, int32 height);
 	void updateMvp(glm::vec3 lightDirection);
 
