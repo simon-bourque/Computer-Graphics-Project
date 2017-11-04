@@ -197,12 +197,11 @@ glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
 Chunk ChunkManager::getChunkHandle(glm::vec3 currentChunk)
 {
 	int64 chunkPosition = encodePosition(currentChunk.x, currentChunk.z);
-	//need to figure out loading issue..
+	
 	Chunk chunky;
-	if (cmLoadedChunks.size() > 10)
+	if (cmLoadedChunks.size() > 10)//need to figure out loading issue..
 	{
 		chunky = cmLoadedChunks.at(chunkPosition);
-		std::cout << "chunky at (" << chunky.getPosition().x << "," << chunky.getPosition().y << "," << chunky.getPosition().z << ")" << std::endl;
 	}
 
 	return chunky;
@@ -230,6 +229,8 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	std::vector<float32> normals;
 	std::vector<uint32> indices;
 	std::vector<GLuint> vbos;
+	std::vector<glm::vec3> cloud;
+	cloud.reserve(chunkData.size());
 
 	cube::fill(vertices, uvCoords, normals, indices);
 
@@ -279,6 +280,10 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 		positions[(i * 3) + 1] = pos.y;
 		positions[(i * 3) + 2] = pos.z;
 		textureIndices[i] = type;
+		int x = pos.x;
+		int y = pos.y;
+		int z = pos.z;
+		cloud.push_back(pos);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
@@ -306,6 +311,7 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVao(chunkVao);
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
+	chunky.setBlockPositions(cloud);
 	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
 	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
 }

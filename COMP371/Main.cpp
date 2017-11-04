@@ -28,6 +28,7 @@
 
 #include "FreeCameraController.h"
 #include "Player.h"
+#include "AABB.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -71,8 +72,6 @@ int main() {
 #endif
 
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
-
-		initTestCube();
 	}
 	catch (std::runtime_error& ex) {
 		std::cout << ex.what() << std::endl;
@@ -109,11 +108,22 @@ int main() {
 	gPlayer = new Player();
 	gPlayer->transform = &(RenderingContext::get()->camera.transform);
 
+	initTestCube();
+
 	// Start loop
 	uint32 frames = 0;
 	float64 counter = 0;
 	float64 delta = 0;
 	float64 currentTime = 0;
+
+	//AABB b1(glm::vec3(0.0f,0.0f,0.0f), 1);
+	//AABB b2(glm::vec3(0.5f,1.0f,1.0f), 1);
+
+	//bool bb = AABB::checkCollision(b1, b2);
+	//std::cout << "col1 " << b << std::endl;
+
+	//bool bp = AABB::checkPointInAABB(glm::vec3(0.1f,0.1f,0.1f), b1);
+	//std::cout << "col2 " << bp << std::endl;
 
 	while (!glfwWindowShouldClose(gWindow)) {
 		glfwPollEvents();
@@ -181,8 +191,6 @@ void update(float32 deltaSeconds) {
 	gPlayer->update(deltaSeconds);
 
 	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
-	std::cout << "currentChunk at (" << currentChunk.x << "," << currentChunk.y << "," << currentChunk.z << ")" << std::endl;
-	ChunkManager::instance()->getChunkHandle(currentChunk);
 
 	// Spooky hack lol
 	static glm::vec3 lastChunk(currentChunk.x + 1.0f, currentChunk.y, currentChunk.z);
