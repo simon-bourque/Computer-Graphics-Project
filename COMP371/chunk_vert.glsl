@@ -7,6 +7,7 @@ layout(location = 3) in vec3 instancePosition;
 layout(location = 4) in int faceIndex;
 
 uniform mat4 vpMatrix;
+uniform mat4 lightSpaceMatrix;
 
 uniform vec3 faceData[6]; // WARNING: This always has to match with the BlockType enum in Block.h
 
@@ -15,6 +16,7 @@ out VertexData {
 	vec2 UvCoords;
 	vec3 normal; // normal in world space
 	vec3 fragPos;
+	vec4 fragPosLightSpace;
 } passToFrag;
 
 void main() {
@@ -39,8 +41,9 @@ void main() {
 	blockTransform[3][0] = instancePosition.x;
 	blockTransform[3][1] = instancePosition.y;
 	blockTransform[3][2] = instancePosition.z;
-		
+	
 	passToFrag.fragPos = vec3(blockTransform * position);
+	passToFrag.fragPosLightSpace = lightSpaceMatrix * vec4(passToFrag.fragPos, 1.0);
 
 	gl_Position = vpMatrix * blockTransform * position;
 }

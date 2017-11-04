@@ -31,7 +31,7 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 {
 	// Get chunk origin position instead of center position
 	int chunkSize = ChunkManager::CHUNKWIDTH;
-	glm::vec3 chunkOriginPos = chunk.getPosition() - glm::vec3(chunkSize/2.0f,0, chunkSize / 2.0f); // Assumes chunk y-pos = 0
+	glm::vec3 chunkOriginPos = chunk.getPosition() - glm::vec3(chunkSize / 2.0f, 0, chunkSize / 2.0f); // Assumes chunk y-pos = 0
 	
 	vector<Block> heightmapBlocks;
 	heightmapBlocks.reserve(chunkSize * chunkSize);
