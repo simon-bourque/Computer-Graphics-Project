@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "Profiling.h"
+
 //Local headers
 #include "ChunkManager.h"
 #include "Types.h"
@@ -118,6 +120,10 @@ int main() {
 	float64 currentTime = 0;
 
 	while (!glfwWindowShouldClose(gWindow)) {
+
+#ifdef DEBUG_BUILD
+		BROFILER_FRAME("MainThread")
+#endif
 		glfwPollEvents();
 
 		currentTime = glfwGetTime();
@@ -182,6 +188,8 @@ GLFWwindow* initGLFW() {
 }
 
 void update(float32 deltaSeconds) {
+	INSTRUMENT_FUNCTION("Update", Profiler::Color::Orchid);
+
 	// Update logic...
 	gCameraController->update(deltaSeconds);
 
@@ -209,6 +217,8 @@ void update(float32 deltaSeconds) {
 }
 
 void render() {
+	INSTRUMENT_FUNCTION("Render", Profiler::Color::Bisque);
+
 	RenderingContext::get()->prepareFrame();
 
 #ifdef COMPILE_DRAW_NORMALS
