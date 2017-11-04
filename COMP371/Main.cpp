@@ -156,7 +156,7 @@ GLFWwindow* initGLFW() {
 	// 8x MSAA
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
 
 	if (!window) {
 		glfwTerminate();
@@ -208,19 +208,17 @@ void render() {
 	shadowMap->updateMvp(lightDirection);
 
 	//First Pass (Shadows)
-	glCullFace(GL_FRONT);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
 	smShader->use();
 	smShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(4.0f, 2.0f);
+	glPolygonOffset(2.0f, 4.0f);
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	glCullFace(GL_BACK);
 
 	// Second Pass (Render chunks)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
