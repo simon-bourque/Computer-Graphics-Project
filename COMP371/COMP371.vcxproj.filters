@@ -85,7 +85,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="TreeBuilder.cpp" />
+    <ClCompile Include="TreeBuilder.cpp" >
+	      <Filter>Core\Procedural</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -142,7 +144,12 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="TreeBuilder.h" />
+    <ClInclude Include="TreeBuilder.h">
+	      <Filter>Core\Procedural</Filter>
+    </ClInclude>
+	<ClInclude Include="Profiling.h">
+	    <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test_cube_vert.glsl">
