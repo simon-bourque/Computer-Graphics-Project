@@ -156,6 +156,9 @@
     <ClInclude Include="Player.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test_cube_vert.glsl">

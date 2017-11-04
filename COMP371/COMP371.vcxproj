@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FreeCameraController.h" />
     <ClInclude Include="InputManager.h" />
