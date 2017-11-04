@@ -6,6 +6,10 @@
 #include <GL/glew.h>
 #include "Primitives.h"
 
+#ifdef DEBUG_BUILD
+#include <Brofiler/Brofiler.h>
+#endif
+
 constexpr int64 encodePosition(int32 x, int32 z)
 {
 	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
@@ -55,6 +59,10 @@ DWORD WINAPI cmRoutine(LPVOID p)
 
 void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
+#ifdef DEBUG_BUILD
+	BROFILER_CATEGORY("LoadChunks", Profiler::Color::DarkViolet);
+#endif
+
 	// Unload out of range chunks
 	unloadChunks(currentChunk);
 
@@ -153,6 +161,10 @@ glm::vec3 ChunkManager::fetchQueueIn()
 
 void ChunkManager::uploadQueuedChunk()
 {
+#ifdef DEBUG_BUILD
+	BROFILER_CATEGORY("UploadChunk", Profiler::Color::AliceBlue);
+#endif
+
 	cmOutMutex.lock();
 	
 	if (cmOutQueue.empty()) {
