@@ -6,6 +6,10 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#ifdef DEBUG_BUILD
+#include <Brofiler/Brofiler.h>
+#endif
+
 //Local headers
 #include "ChunkManager.h"
 #include "Types.h"
@@ -110,6 +114,10 @@ int main() {
 	float64 currentTime = 0;
 
 	while (!glfwWindowShouldClose(gWindow)) {
+
+#ifdef DEBUG_BUILD
+		BROFILER_FRAME("MainThread")
+#endif
 		glfwPollEvents();
 
 		currentTime = glfwGetTime();
@@ -168,6 +176,10 @@ GLFWwindow* initGLFW() {
 }
 
 void update(float32 deltaSeconds) {
+#ifdef DEBUG_BUILD
+	BROFILER_CATEGORY("Update", Profiler::Color::Orchid);
+#endif
+
 	// Update logic...
 	gCameraController->update(deltaSeconds);
 
@@ -189,6 +201,10 @@ void update(float32 deltaSeconds) {
 }
 
 void render() {
+#ifdef DEBUG_BUILD
+	BROFILER_CATEGORY("Render", Profiler::Color::Bisque);
+#endif
+
 	RenderingContext::get()->prepareFrame();
 
 #ifdef COMPILE_DRAW_NORMALS
