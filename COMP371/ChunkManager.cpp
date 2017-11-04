@@ -6,9 +6,7 @@
 #include <GL/glew.h>
 #include "Primitives.h"
 
-#ifdef DEBUG_BUILD
-#include <Brofiler/Brofiler.h>
-#endif
+#include "Profiling.h"
 
 constexpr int64 encodePosition(int32 x, int32 z)
 {
@@ -59,9 +57,7 @@ DWORD WINAPI cmRoutine(LPVOID p)
 
 void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
-#ifdef DEBUG_BUILD
-	BROFILER_CATEGORY("LoadChunks", Profiler::Color::DarkViolet);
-#endif
+	INSTRUMENT_FUNCTION("LoadChunks", Profiler::Color::DarkViolet);
 
 	// Unload out of range chunks
 	unloadChunks(currentChunk);
@@ -161,9 +157,7 @@ glm::vec3 ChunkManager::fetchQueueIn()
 
 void ChunkManager::uploadQueuedChunk()
 {
-#ifdef DEBUG_BUILD
-	BROFILER_CATEGORY("UploadChunk", Profiler::Color::AliceBlue);
-#endif
+	INSTRUMENT_FUNCTION("UploadChunk", Profiler::Color::AliceBlue);
 
 	cmOutMutex.lock();
 	

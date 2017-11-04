@@ -6,9 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#ifdef DEBUG_BUILD
-#include <Brofiler/Brofiler.h>
-#endif
+#include "Profiling.h"
 
 //Local headers
 #include "ChunkManager.h"
@@ -176,9 +174,7 @@ GLFWwindow* initGLFW() {
 }
 
 void update(float32 deltaSeconds) {
-#ifdef DEBUG_BUILD
-	BROFILER_CATEGORY("Update", Profiler::Color::Orchid);
-#endif
+	INSTRUMENT_FUNCTION("Update", Profiler::Color::Orchid);
 
 	// Update logic...
 	gCameraController->update(deltaSeconds);
@@ -201,9 +197,7 @@ void update(float32 deltaSeconds) {
 }
 
 void render() {
-#ifdef DEBUG_BUILD
-	BROFILER_CATEGORY("Render", Profiler::Color::Bisque);
-#endif
+	INSTRUMENT_FUNCTION("Render", Profiler::Color::Bisque);
 
 	RenderingContext::get()->prepareFrame();
 

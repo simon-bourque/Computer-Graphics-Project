@@ -181,6 +181,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
+    <ClInclude Include="Profiling.h" />
     <ClInclude Include="RenderingContext.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderCache.h" />
