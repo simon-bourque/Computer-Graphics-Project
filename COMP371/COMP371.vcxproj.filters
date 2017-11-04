@@ -85,6 +85,7 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -141,6 +142,7 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="TreeBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test_cube_vert.glsl">
@@ -159,8 +161,8 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="skybox_vert.glsl">
-	  <Filter>Shader Files</Filter>
-	</None>
+      <Filter>Shader Files</Filter>
+    </None>
     <None Include="shadowmap_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>

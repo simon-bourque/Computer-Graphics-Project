@@ -150,6 +150,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="TerrainBuilder.cpp" />
+    <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="ChunkManager.h" />
     <ClInclude Include="TerrainBuilder.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TreeBuilder.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
