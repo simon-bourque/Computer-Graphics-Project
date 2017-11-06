@@ -85,6 +85,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="TreeBuilder.cpp" >
+	      <Filter>Core\Procedural</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -141,8 +144,11 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="Profiling.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="TreeBuilder.h">
+	      <Filter>Core\Procedural</Filter>
+    </ClInclude>
+	<ClInclude Include="Profiling.h">
+	    <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +162,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shadowmap_frag.glsl">
