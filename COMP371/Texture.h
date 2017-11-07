@@ -7,7 +7,8 @@ class Texture {
 public:
 	enum Type : GLenum {
 		TEXTURE_2D = GL_TEXTURE_2D,
-		TEXTURE_2D_ARRAY = GL_TEXTURE_2D_ARRAY
+		TEXTURE_2D_ARRAY = GL_TEXTURE_2D_ARRAY,
+		TEXTURE_CUBE_MAP = GL_TEXTURE_CUBE_MAP
 	};
 
 	enum Unit : GLenum {

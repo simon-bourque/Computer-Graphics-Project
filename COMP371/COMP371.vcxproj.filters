@@ -90,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="WaterRenderer.cpp">
       <Filter>Graphics</Filter>
+	  	</ClCompile>
+    <ClCompile Include="TreeBuilder.cpp" >
+	      <Filter>Core\Procedural</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +155,12 @@
     </ClInclude>
     <ClInclude Include="Profiling.h">
       <Filter>Core</Filter>
+	</ClInclude>
+    <ClInclude Include="TreeBuilder.h">
+	      <Filter>Core\Procedural</Filter>
+    </ClInclude>
+	<ClInclude Include="Profiling.h">
+	    <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="WaterRenderer.h">
       <Filter>Graphics</Filter>
@@ -168,6 +177,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shadowmap_frag.glsl">

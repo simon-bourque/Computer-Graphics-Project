@@ -176,6 +176,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="TerrainBuilder.cpp" />
     <ClCompile Include="WaterRenderer.cpp" />
+    <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -197,6 +198,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="ChunkManager.h" />
     <ClInclude Include="TerrainBuilder.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TreeBuilder.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="WaterRenderer.h" />
   </ItemGroup>
@@ -205,6 +207,8 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <None Include="chunk_normals_frag.glsl" />
     <None Include="chunk_normals_geo.glsl" />
     <None Include="chunk_vert.glsl" />
+    <None Include="skybox_frag.glsl" />
+    <None Include="skybox_vert.glsl" />
     <None Include="shadowmap_frag.glsl" />
     <None Include="shadowmap_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
