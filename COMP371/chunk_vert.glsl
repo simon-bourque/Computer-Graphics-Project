@@ -52,7 +52,7 @@ void main() {
 	
 	vec4 worldPosition = blockTransform * position;
 	passToFrag.fragPos = vec3(worldPosition);
-	passToFrag.fragPosLightSpace = lightSpaceMatrix * vec4(passToFrag.fragPos, 1.0);
+	passToFrag.fragPosLightSpace = lightSpaceMatrix * worldPosition;
 	
 	// Calculate clip
 	gl_ClipDistance[0] = dot(worldPosition, vec4(0, -1, 0, waterPlaneHeight + 0.5));
