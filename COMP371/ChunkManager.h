@@ -28,7 +28,6 @@ public:
 	static ChunkManager* instance();
 	HANDLE getSemaphoreHandle() const { return cmSemaphore; }
 	glm::vec3 getCurrentChunk(glm::vec3 playerPosition) const;
-	uint32 getLoadingRadius() { return LOADINGRADIUS; }
 
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);

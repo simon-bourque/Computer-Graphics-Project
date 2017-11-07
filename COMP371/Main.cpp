@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "Profiling.h"
+
 //Local headers
 #include "ChunkManager.h"
 #include "Types.h"
@@ -28,6 +30,8 @@
 #include <vector>
 
 #include "FreeCameraController.h"
+
+#include "WaterRenderer.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -78,6 +82,9 @@ int main() {
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("texture_shader", 7, "tiles.png");
 
 		initTestCube();
+
+		WaterRenderer::init();
+		WaterRenderer::get()->buildFBO(SCREENWIDTH, SCREENHEIGHT);
 	}
 	catch (std::runtime_error& ex) {
 		std::cout << ex.what() << std::endl;
@@ -87,7 +94,7 @@ int main() {
 
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
-	RenderingContext::get()->camera.transform.translateLocal(0,160,0);
+	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Load face data for shader
@@ -113,6 +120,10 @@ int main() {
 	float64 currentTime = 0;
 
 	while (!glfwWindowShouldClose(gWindow)) {
+
+#ifdef DEBUG_BUILD
+		BROFILER_FRAME("MainThread")
+#endif
 		glfwPollEvents();
 
 		currentTime = glfwGetTime();
@@ -139,6 +150,7 @@ int main() {
 	delete shadowMap;
 	delete sun;
 
+	WaterRenderer::destroy();
 	RenderingContext::destroy();
 	
 	glfwTerminate();
@@ -167,15 +179,20 @@ GLFWwindow* initGLFW() {
 	glfwSwapInterval(1);
 
 	
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
-		glViewport(0, 0, width, height); 
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { 
+		glViewport(0, 0, width, height);
+		WaterRenderer::get()->resizeFBO(width, height);
 		shadowMap->updateSize(width, height);
+		SCREENWIDTH = width;
+		SCREENHEIGHT = height;
 	});
 
 	return window;
 }
 
 void update(float32 deltaSeconds) {
+	INSTRUMENT_FUNCTION("Update", Profiler::Color::Orchid);
+
 	// Update logic...
 	gCameraController->update(deltaSeconds);
 
@@ -194,9 +211,17 @@ void update(float32 deltaSeconds) {
 
 	chunkShader->use();
 	chunkShader->setUniform("viewPos", playerPos);
+
+	static float32 panner = 0;
+	panner += 0.05 * deltaSeconds;
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->use();
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("viewPos", playerPos);
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("panner", panner);
 }
 
 void render() {
+	INSTRUMENT_FUNCTION("Render", Profiler::Color::Bisque);
+
 	RenderingContext::get()->prepareFrame();
 
 #ifdef COMPILE_DRAW_NORMALS
@@ -220,12 +245,24 @@ void render() {
 	}
 	glDisable(GL_POLYGON_OFFSET_FILL);
 
-	// Second Pass (Render chunks)
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Second Pass (render refraction texture)
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
 	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
 	chunkTexture->bind(Texture::UNIT_0);
+	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CLIP_DISTANCE0);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+	glDisable(GL_CLIP_DISTANCE0);
+
+	
+	// Render chunks
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
 	for (const auto& chunk : chunks) {
@@ -237,6 +274,14 @@ void render() {
 		glDrawElementsInstanced(GL_POINTS, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 		chunkShader->use();
 #endif
+	}
+
+	// Render water
+	for (const auto& chunk : chunks) {
+		glm::vec3 pos = chunk.second.getPosition();
+
+		// Render water
+		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
 	}
 
 	// Render test cube

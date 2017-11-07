@@ -11,6 +11,13 @@ uniform mat4 lightSpaceMatrix;
 
 uniform vec3 faceData[6]; // WARNING: This always has to match with the BlockType enum in Block.h
 
+uniform float waterPlaneHeight; // Used for clipping
+out gl_PerVertex
+{
+  vec4 gl_Position;
+  float gl_ClipDistance[1];
+}; // Also used for clipping
+
 out VertexData {
 	flat int faceIndex;
 	vec2 UvCoords;
@@ -20,6 +27,7 @@ out VertexData {
 } passToFrag;
 
 void main() {
+
 	// If this is the top face
 	if (normal == vec3(0.0,1.0,0.0)) {
 			passToFrag.faceIndex = int(faceData[faceIndex].y);
@@ -42,8 +50,12 @@ void main() {
 	blockTransform[3][1] = instancePosition.y;
 	blockTransform[3][2] = instancePosition.z;
 	
-	passToFrag.fragPos = vec3(blockTransform * position);
+	vec4 worldPosition = blockTransform * position;
+	passToFrag.fragPos = vec3(worldPosition);
 	passToFrag.fragPosLightSpace = lightSpaceMatrix * vec4(passToFrag.fragPos, 1.0);
+	
+	// Calculate clip
+	gl_ClipDistance[0] = dot(worldPosition, vec4(0, -1, 0, waterPlaneHeight + 0.5));
 
-	gl_Position = vpMatrix * blockTransform * position;
+	gl_Position = vpMatrix * worldPosition;
 }

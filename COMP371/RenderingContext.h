@@ -4,6 +4,8 @@
 #include "ModelCache.h"
 #include "TextureCache.h"
 
+#include "WaterRenderer.h"
+
 #include "Camera.h"
 
 class RenderingContext {
