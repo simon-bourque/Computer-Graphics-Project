@@ -19,7 +19,7 @@ uniform float panner;
 void main() {
 	//finalColor = texture(normal, passUvCoords);
 	//135,206,250
-	vec4 tempColor = vec4(135/255.0,206/255.0,250/255.0,0.5);
+	vec4 tempColor = vec4(135/255.0,206/255.0,250/255.0,1);
 	//vec4 tempColor = vec4(0.0,0.0,0.2,0.4);
 	vec3 normal1 = texture(normalMap, tiledNormalUvCoords + vec2(panner,panner)).rgb;
 	vec3 normal2 = texture(normalMap2, tiledNormalUvCoords + vec2(-panner,-panner)).rgb;

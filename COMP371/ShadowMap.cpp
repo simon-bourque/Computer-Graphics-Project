@@ -22,7 +22,7 @@ void ShadowMap::updateMvp(glm::vec3 lightDirection)
 	glm::vec3 invLightDirection = glm::normalize(-lightDirection);
 	glm::vec3 playerPos = RenderingContext::get()->camera.transform.getPosition();
 	glm::vec3 lightPosition = (invLightDirection*300.0f);
-	float32 loadingRadius = (ChunkManager::instance()->getLoadingRadius() + 0.5) * ChunkManager::CHUNKWIDTH;
+	float32 loadingRadius = (ChunkManager::LOADINGRADIUS + 0.5) * ChunkManager::CHUNKWIDTH;
 
 	glm::mat4 proj = glm::ortho<float>(-loadingRadius, loadingRadius, 0, ChunkManager::CHUNKHEIGHT, 0.1f , 500.0f);
 	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));

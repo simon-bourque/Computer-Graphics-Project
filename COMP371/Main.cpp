@@ -48,7 +48,7 @@ int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
 glm::vec3 playerPosition(0, 160, 0);
 LightSource* sun = nullptr;
 ShadowMap* shadowMap = nullptr;
-glm::vec3 lightDirection(0.0f, -0.1f, -0.5f);
+glm::vec3 lightDirection(0.0f, -0.5f, -0.5f);
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;

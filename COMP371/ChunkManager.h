@@ -43,6 +43,7 @@ public:
 	static const int32 CHUNKWIDTH = 32;
 	static const uint32 CHUNKHEIGHT = 256;
 	static const uint32 NUMBEROFBLOCKS = CHUNKWIDTH*CHUNKWIDTH*CHUNKHEIGHT;
+	static const int32 LOADINGRADIUS = 5;
 
 	const std::unordered_map<int64, Chunk>& getCurrentlyLoadedChunks() const { return cmLoadedChunks; };
 
@@ -61,7 +62,6 @@ private:
 	std::mutex cmOutMutex;
 
 	//Loading Chunks
-	static const int32 LOADINGRADIUS = 5;
 	std::unordered_map<int64, Chunk> cmLoadingChunks;
 	std::unordered_map<int64, Chunk> cmLoadedChunks;
 
