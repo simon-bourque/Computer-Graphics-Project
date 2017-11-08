@@ -61,5 +61,5 @@ void main() {
 	tempColor = vec4((ambient + (1.0 - shadowFactor) * (diffuse + specular)), 1.0f) * tempColor;
 	
 
-	finalColor = tempColor;
+	finalColor = clamp(tempColor, 0.0, 1.0);
 }

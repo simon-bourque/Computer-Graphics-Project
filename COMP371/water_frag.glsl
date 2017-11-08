@@ -71,7 +71,7 @@ void main() {
 	
 	
 	// Mix everything together
-	finalColor = mix(tempColor, texture(refractionTexture, uv + dudvDisp), 0.5);
+	finalColor = clamp(mix(tempColor, texture(refractionTexture, uv + dudvDisp), 0.5), 0.0,1.0);
 	
 	//finalColor = vec4(normal, 1.0);
 	//finalColor = vec4(specular,1.0);
