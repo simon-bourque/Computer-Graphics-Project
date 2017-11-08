@@ -21,13 +21,13 @@ ShadowMap::ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection)
 
 void ShadowMap::updateMvp(const glm::vec3& lightDirection)
 {
-	glm::vec3 invLightDirection = glm::normalize(-lightDirection);
+	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * 500.0f;
 	glm::vec3 playerPos = RenderingContext::get()->camera.transform.getPosition();
-	glm::vec3 lightPosition = (invLightDirection*500.0f);
+	glm::vec3 lightPosition = { playerPos.x + invLightDirection.x, invLightDirection.y, playerPos.z + invLightDirection.z };
 	float32 loadingRadius = (ChunkManager::LOADINGRADIUS + 0.5) * ChunkManager::CHUNKWIDTH;
 
 	glm::mat4 proj = glm::ortho<float>(-loadingRadius, loadingRadius, 0, ChunkManager::CHUNKHEIGHT, 0.1f , 1000.0f);
-	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(playerPos.x, 0, playerPos.z), glm::vec3(0, 1, 0));
 	glm::mat4 mod = glm::mat4(1.0f);
 	
 	m_lightSpaceMVP = proj * view * mod;

@@ -269,6 +269,7 @@ void render() {
 	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
 	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMVP());
 	chunkTexture->bind(Texture::UNIT_0);
+	shadowMap->bindTexture(Texture::UNIT_1);
 	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CLIP_DISTANCE0);
