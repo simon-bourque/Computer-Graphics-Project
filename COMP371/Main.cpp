@@ -69,6 +69,8 @@ FreeCameraController* gCameraController;
 ShaderProgram* chunkNormalsShader = nullptr;
 #endif
 
+#define RENDER_WATER // Comment me if you don't want to render water
+
 int main() {
 
 	try {
@@ -125,10 +127,12 @@ int main() {
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
 
-	glm::vec3 lightColor(0.9f, 0.9f, 0.9f);
+	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
-	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.01f);
+	sun = new LightSource(lightDirection, lightColor);
 	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
+
+	WaterRenderer::get()->setLightUniforms(*sun);
 
 	// Start loop
 	uint32 frames = 0;
@@ -296,12 +300,14 @@ void render() {
 	}
 
 	// Render water
+#ifdef RENDER_WATER
 	for (const auto& chunk : chunks) {
 		glm::vec3 pos = chunk.second.getPosition();
 
 		// Render water
 		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
 	}
+#endif
 
 	// Render test cube
 	cubeShader->use();

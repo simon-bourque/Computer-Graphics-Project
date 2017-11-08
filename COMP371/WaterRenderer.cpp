@@ -131,3 +131,9 @@ void WaterRenderer::render(float32 x, float32 z, float32 scale) {
 	m_waterShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	glDrawElements(GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, nullptr);
 }
+
+void WaterRenderer::setLightUniforms(const LightSource& light) {
+	m_waterShader->use();
+	m_waterShader->setUniform("lightDirection", light.getDirection());
+	m_waterShader->setUniform("lightColor", light.getColor());
+}
