@@ -19,6 +19,7 @@
 #include "RenderingContext.h"
 
 #include "LightSource.h"
+#include "ShadowMap.h"
 
 #include "ModelCache.h"
 #include "Model.h"
@@ -29,6 +30,8 @@
 #include <vector>
 
 #include "FreeCameraController.h"
+
+#include "WaterRenderer.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -41,10 +44,15 @@ ShaderProgram* cubeShader = nullptr;
 Model* cubeModel = nullptr;
 Texture* cubeTexture = nullptr;
 
-glm::vec3 playerPosition(0, 160, 2);
+int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
+glm::vec3 playerPosition(0, 160, 0);
+LightSource* sun = nullptr;
+ShadowMap* shadowMap = nullptr;
+glm::vec3 lightDirection(0.0f, -0.5f, -0.5f);
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
+ShaderProgram* smShader = nullptr;
 
 void initSkybox();
 unsigned int skyboxVAO, skyboxVBO;
@@ -70,6 +78,7 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
+		smShader = RenderingContext::get()->shaderCache.loadShaderProgram("sm_shader", "shadowmap_vert.glsl", "shadowmap_frag.glsl");
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("chunk_texture", 7, "tiles.png");
 
 		// Load skybox texture
@@ -90,6 +99,9 @@ int main() {
 		//glLineWidth(3.0f);
 #endif
 		initTestCube();
+
+		WaterRenderer::init();
+		WaterRenderer::get()->buildFBO(SCREENWIDTH, SCREENHEIGHT);
 	}
 	catch (std::runtime_error& ex) {
 		std::cout << ex.what() << std::endl;
@@ -99,7 +111,7 @@ int main() {
 
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
-	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
+	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Load face data for shader
@@ -113,14 +125,10 @@ int main() {
 	chunkShader->use();
 	chunkShader->setUniform("faceData", faceData);
 
-	glm::vec3 lightDirection(-0.80f, -0.5f, 0.0f);
-	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	LightSource sun(lightDirection, lightColor, 0.5f, 0.25f);
-	chunkShader->use();
-	chunkShader->setUniform("lightColor", sun.getColor());
-	chunkShader->setUniform("lightDirection", sun.getDirection());
-	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
-	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
+	glm::vec3 lightColor(0.9f, 0.9f, 0.9f);
+
+	sun = new LightSource(lightDirection, lightColor, 0.5f, 0.01f);
+	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
 
 	// Start loop
 	uint32 frames = 0;
@@ -156,7 +164,10 @@ int main() {
 	}
 
 	delete gCameraController;
+	delete shadowMap;
+	delete sun;
 
+	WaterRenderer::destroy();
 	RenderingContext::destroy();
 	
 	glfwTerminate();
@@ -174,7 +185,7 @@ GLFWwindow* initGLFW() {
 	// 8x MSAA
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Final Project", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
 
 	if (!window) {
 		glfwTerminate();
@@ -185,7 +196,13 @@ GLFWwindow* initGLFW() {
 	glfwSwapInterval(1);
 
 	
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { 
+		glViewport(0, 0, width, height);
+		WaterRenderer::get()->resizeFBO(width, height);
+		shadowMap->updateSize(width, height);
+		SCREENWIDTH = width;
+		SCREENHEIGHT = height;
+	});
 
 	return window;
 }
@@ -211,6 +228,12 @@ void update(float32 deltaSeconds) {
 
 	chunkShader->use();
 	chunkShader->setUniform("viewPos", playerPos);
+
+	static float32 panner = 0;
+	panner += 0.05 * deltaSeconds;
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->use();
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("viewPos", playerPos);
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("panner", panner);
 }
 
 void render() {
@@ -223,11 +246,44 @@ void render() {
 	chunkNormalsShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 #endif
 
-	// Render chunks
+	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	shadowMap->updateMvp(lightDirection);
+
+	//First Pass (Shadows)
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
+	smShader->use();
+	smShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0f, 1.0f);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+	glDisable(GL_POLYGON_OFFSET_FILL);
+
+	// Second Pass (render refraction texture)
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
+	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
+	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
 	chunkTexture->bind(Texture::UNIT_0);
-	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
+	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CLIP_DISTANCE0);
+	for (const auto& chunk : chunks) {
+		glBindVertexArray(chunk.second.getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	}
+	glDisable(GL_CLIP_DISTANCE0);
+
+	
+	// Render chunks
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
@@ -237,6 +293,14 @@ void render() {
 		glDrawElementsInstanced(GL_POINTS, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 		chunkShader->use();
 #endif
+	}
+
+	// Render water
+	for (const auto& chunk : chunks) {
+		glm::vec3 pos = chunk.second.getPosition();
+
+		// Render water
+		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
 	}
 
 	// Render test cube

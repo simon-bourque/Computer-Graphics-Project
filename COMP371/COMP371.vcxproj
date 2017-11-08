@@ -169,11 +169,13 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClCompile Include="ShaderCache.cpp" />
     <ClCompile Include="Primitives.cpp" />
     <ClCompile Include="LightSource.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="TerrainBuilder.cpp" />
+    <ClCompile Include="WaterRenderer.cpp" />
     <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +190,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />
@@ -197,6 +200,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TreeBuilder.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="WaterRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="chunk_frag.glsl" />
@@ -209,6 +213,8 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <None Include="shadowmap_vert.glsl" />
     <None Include="test_cube_frag.glsl" />
     <None Include="test_cube_vert.glsl" />
+    <None Include="water_frag.glsl" />
+    <None Include="water_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -85,6 +85,12 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Graphics\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterRenderer.cpp">
+      <Filter>Graphics</Filter>
+	  	</ClCompile>
     <ClCompile Include="TreeBuilder.cpp" >
 	      <Filter>Core\Procedural</Filter>
     </ClCompile>
@@ -144,11 +150,20 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Graphics\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling.h">
+      <Filter>Core</Filter>
+	</ClInclude>
     <ClInclude Include="TreeBuilder.h">
 	      <Filter>Core\Procedural</Filter>
     </ClInclude>
 	<ClInclude Include="Profiling.h">
 	    <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterRenderer.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +195,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_normals_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

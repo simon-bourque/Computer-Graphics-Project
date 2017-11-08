@@ -8,6 +8,11 @@
  * A light source class meant to simulate light coming from the sun or the moon for example.
  */
 
+enum class SourceType
+{
+	DIRECTIONAL, POINT
+};
+
 struct LightSource
 {
 public:
@@ -21,8 +26,12 @@ public:
 	float32 getSpecStrength() { return m_specStrength; }
 
 private:
+	void initShaders();
+
 	float32 m_ambStrength;
 	float32 m_specStrength;
+
+	SourceType m_type;
 
 	glm::vec3 m_position;
 	glm::vec3 m_direction;
