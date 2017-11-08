@@ -1,35 +1,37 @@
 #pragma once
 
 #include "Types.h"
-#include "ShaderProgram.h"
+#include "Texture.h"
 
 #include "glm\glm.hpp"
+
+class ShaderProgram;
+
 class ShadowMap
 {
 public:
 	ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection);
 
 	void updateSize(int32 width, int32 height);
-	void updateMvp(glm::vec3 lightDirection);
+	void updateMvp(const glm::vec3& lightDirection);
 
-	uint32 getFbo() { return m_fbo; }
-	glm::mat4 getMvp() { return m_MVP; }
-	uint32 getTexture() { return m_texture; }
+	uint32 getFbo() const { return m_shadowFBO; }
+	glm::mat4 getMVP() const { return m_lightSpaceMVP; }
+
+	void bindTexture(Texture::Unit unit);
 
 	~ShadowMap();
 private:
-	void buildBuffer();
+	void buildFBO();
 
-	//Texture dimensions
 	int32 m_width;
 	int32 m_height;
 
-	glm::mat4 m_MVP;
+	glm::mat4 m_lightSpaceMVP;
 
-	ShaderProgram* m_Shaders;
+	ShaderProgram* m_shadowShader;
 
-	//OpenGL IDs
-	uint32 m_fbo;
-	uint32 m_texture;
+	uint32 m_shadowFBO;
+	uint32 m_depthTexture;
 };
 

@@ -48,11 +48,10 @@ int32 SCREENWIDTH = 600, SCREENHEIGHT = 480;
 glm::vec3 playerPosition(0, 160, 0);
 LightSource* sun = nullptr;
 ShadowMap* shadowMap = nullptr;
-glm::vec3 lightDirection(0.0f, -0.5f, -0.5f);
+glm::vec3 lightDirection(0.0f, -0.2f, -0.5f);
 
 ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
-ShaderProgram* smShader = nullptr;
 
 void initSkybox();
 unsigned int skyboxVAO, skyboxVBO;
@@ -69,7 +68,8 @@ FreeCameraController* gCameraController;
 ShaderProgram* chunkNormalsShader = nullptr;
 #endif
 
-#define RENDER_WATER // Comment me if you don't want to render water
+#define RENDER_WATER	// Comment me if you don't want to render water
+#define RENDER_SHADOWS	// Comment me if you don't want to render shadows
 
 int main() {
 
@@ -80,7 +80,6 @@ int main() {
 
 		RenderingContext::init();
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
-		smShader = RenderingContext::get()->shaderCache.loadShaderProgram("sm_shader", "shadowmap_vert.glsl", "shadowmap_frag.glsl");
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("chunk_texture", 7, "tiles.png");
 
 		// Load skybox texture
@@ -187,7 +186,7 @@ GLFWwindow* initGLFW() {
 
 	glfwDefaultWindowHints();
 	// 8x MSAA
-	glfwWindowHint(GLFW_SAMPLES, 8);
+	//glfwWindowHint(GLFW_SAMPLES, 8);
 
 	GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
 
@@ -251,29 +250,25 @@ void render() {
 #endif
 
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
-	shadowMap->updateMvp(lightDirection);
 
 	//First Pass (Shadows)
+	shadowMap->updateMvp(lightDirection);
+	RenderingContext::get()->shaderCache.getShaderProgram("sm_shader")->use();
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
-	smShader->use();
-	smShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(1.0f, 1.0f);
+#ifdef RENDER_SHADOWS
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
-	glDisable(GL_POLYGON_OFFSET_FILL);
+#endif
 
 	// Second Pass (render refraction texture)
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
-	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMvp());
+	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMVP());
 	chunkTexture->bind(Texture::UNIT_0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
 	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CLIP_DISTANCE0);
@@ -286,8 +281,7 @@ void render() {
 	
 	// Render chunks
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
+	shadowMap->bindTexture(Texture::UNIT_1);
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
