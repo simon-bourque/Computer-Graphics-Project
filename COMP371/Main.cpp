@@ -273,12 +273,14 @@ void render() {
 	chunkTexture->bind(Texture::UNIT_0);
 	shadowMap->bindForReading();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#ifdef RENDER_WATER
 	glEnable(GL_CLIP_DISTANCE0);
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
 	glDisable(GL_CLIP_DISTANCE0);
+#endif
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Render chunks
