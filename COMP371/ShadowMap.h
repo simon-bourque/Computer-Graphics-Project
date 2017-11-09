@@ -13,9 +13,9 @@ public:
 	ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection);
 
 	void updateSize(int32 width, int32 height);
-	void updateMvp(const glm::vec3& lightDirection);
+	void updateMVP(const glm::vec3& lightDirection);
 
-	uint32 getFbo() const { return m_shadowFBO; }
+	uint32 getFBO() const { return m_shadowFBO; }
 	glm::mat4 getMVP() const { return m_lightSpaceMVP; }
 
 	void bindForWriting();

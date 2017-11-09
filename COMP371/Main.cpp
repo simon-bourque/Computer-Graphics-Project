@@ -186,7 +186,7 @@ GLFWwindow* initGLFW() {
 
 	glfwDefaultWindowHints();
 	// 8x MSAA
-	//glfwWindowHint(GLFW_SAMPLES, 8);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
 
@@ -253,7 +253,7 @@ void render() {
 
 	//First Pass (Shadows)
 	RenderingContext::get()->shaderCache.getShaderProgram("sm_shader")->use();
-	shadowMap->updateMvp(lightDirection);
+	shadowMap->updateMVP(lightDirection);
 	shadowMap->bindForWriting();
 	glClear(GL_DEPTH_BUFFER_BIT);
 #ifdef RENDER_SHADOWS

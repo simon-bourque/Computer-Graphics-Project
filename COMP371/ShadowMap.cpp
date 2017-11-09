@@ -10,23 +10,33 @@
 
 #include <iostream>
 
+static const float32 sunDirectionMult = 300.0f;
+
 ShadowMap::ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection)
 	:m_width(width)
 	,m_height(height)
 {
 	m_shadowShader = RenderingContext::get()->shaderCache.loadShaderProgram("sm_shader", "shadowmap_vert.glsl", "shadowmap_frag.glsl");
-	updateMvp(lightDirection);
+	updateMVP(lightDirection);
 	buildFBO();
 }
 
-void ShadowMap::updateMvp(const glm::vec3& lightDirection)
+void ShadowMap::updateMVP(const glm::vec3& lightDirection)
 {
-	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * 300.0f;
+	//The direction of the light inverted to go torwards the sky instead. Multiplied by a variable for distance.
+	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * sunDirectionMult;
 	glm::vec3 playerPos = RenderingContext::get()->camera.transform.getPosition();
+
+	//Setting the x and z components of the light position to follow the player throughout the terrain. The y value is constant.
 	glm::vec3 lightPosition = { playerPos.x + invLightDirection.x, invLightDirection.y, playerPos.z + invLightDirection.z };
+
+	//The radius we need for the orthographic matrix to include all the terrain based on the current chunk loading radius.
 	float32 loadingRadius = (ChunkManager::LOADINGRADIUS + 0.5) * ChunkManager::CHUNKWIDTH;
 
+	//Orthographic projection matrix from the point of view of the sun. The +50 value is just to be safe and include a little bit more of the terrain than needed.
 	glm::mat4 proj = glm::ortho<float>(-(loadingRadius+50), (loadingRadius+50), 0, ChunkManager::CHUNKHEIGHT, 0.1f , 500.0f);
+
+	//Lookat matrix from the light position to look at the x and z component of the player but at 0 in the y axis.
 	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(playerPos.x, 0, playerPos.z), glm::vec3(0, 1, 0));
 	glm::mat4 mod = glm::mat4(1.0f);
 	
