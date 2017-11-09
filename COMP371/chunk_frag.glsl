@@ -15,8 +15,6 @@ uniform vec3 viewPos;
 uniform vec3 lightColor;
 uniform vec3 lightDirection;
 uniform vec3 lightPos;
-uniform float ambientStrength;
-uniform float specularStrength;
 
 out vec4 finalColor;
 
@@ -26,7 +24,8 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 	projCoords = projCoords * 0.5 + 0.5;
 	float closestDepth = texture(shadowMap, projCoords.xy).r;
 	float currentDepth = projCoords.z;
-	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+	float bias = 0.0005;
+	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0;
 
 	return shadow;
 }
@@ -35,21 +34,33 @@ void main() {
 
 	vec4 tempColor = texture(tilesheet, vec3(passFromVertex.UvCoords.x, passFromVertex.UvCoords.y, passFromVertex.faceIndex));
 
+	// Should be unique per material instead of per light so these are hardcoded for now
+	float ambientCoefficient = 0.2;
+	float diffuseCoefficient = 0.9;
+	float specularCoefficient = 0.2;
+	float shininess = 1;
+
 	//Ambient Lighting
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 ambient = ambientCoefficient * lightColor;
 
 	//Diffuse Lighting
-	float diff = max(dot(passFromVertex.normal, lightDirection), 0.0);
+	float diff  = diffuseCoefficient * max(dot(passFromVertex.normal, lightDirection), 0.0);
 	vec3 diffuse = diff * lightColor;
 
 	//Specular Lighting
-	vec3 viewDir = normalize(viewPos - vec3(passFromVertex.fragPos));
-	vec3 reflectDir = reflect(-lightDirection, passFromVertex.normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 2); //CHANGE 2 TO A VARIABLE SHININESS COEFFICIENT DEPENDING ON BLOCK TYPE
-	vec3 specular = specularStrength * spec * lightColor;
+	vec3 specular = vec3(0.0, 0.0, 0.0);
+	
+	// Should not add a specular component when the diffuse dot product is 0
+	if (diff != 0.0) {
+		vec3 viewDir = normalize(viewPos - vec3(passFromVertex.fragPos));
+		vec3 reflectDir = reflect(-lightDirection, passFromVertex.normal);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+		specular = specularCoefficient * spec * lightColor;
+	}
 
 	float shadowFactor = ShadowCalculation(passFromVertex.fragPosLightSpace);
 	tempColor = vec4((ambient + (1.0 - shadowFactor) * (diffuse + specular)), 1.0f) * tempColor;
+	
 
-	finalColor = tempColor;
+	finalColor = clamp(tempColor, 0.0, 1.0);
 }
