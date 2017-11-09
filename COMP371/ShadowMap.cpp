@@ -21,12 +21,12 @@ ShadowMap::ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection)
 
 void ShadowMap::updateMvp(const glm::vec3& lightDirection)
 {
-	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * 500.0f;
+	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * 300.0f;
 	glm::vec3 playerPos = RenderingContext::get()->camera.transform.getPosition();
 	glm::vec3 lightPosition = { playerPos.x + invLightDirection.x, invLightDirection.y, playerPos.z + invLightDirection.z };
 	float32 loadingRadius = (ChunkManager::LOADINGRADIUS + 0.5) * ChunkManager::CHUNKWIDTH;
 
-	glm::mat4 proj = glm::ortho<float>(-loadingRadius, loadingRadius, 0, ChunkManager::CHUNKHEIGHT, 0.1f , 1000.0f);
+	glm::mat4 proj = glm::ortho<float>(-(loadingRadius+50), (loadingRadius+50), 0, ChunkManager::CHUNKHEIGHT, 0.1f , 500.0f);
 	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(playerPos.x, 0, playerPos.z), glm::vec3(0, 1, 0));
 	glm::mat4 mod = glm::mat4(1.0f);
 	
@@ -67,9 +67,15 @@ void ShadowMap::buildFBO()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void ShadowMap::bindTexture(Texture::Unit unit)
+void ShadowMap::bindForWriting()
 {
-	glActiveTexture(unit);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
+}
+
+void ShadowMap::bindForReading()
+{
+	glActiveTexture(Texture::UNIT_1);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 }
 

@@ -252,9 +252,9 @@ void render() {
 	const std::unordered_map<int64, Chunk>& chunks = ChunkManager::instance()->getCurrentlyLoadedChunks();
 
 	//First Pass (Shadows)
-	shadowMap->updateMvp(lightDirection);
 	RenderingContext::get()->shaderCache.getShaderProgram("sm_shader")->use();
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
+	shadowMap->updateMvp(lightDirection);
+	shadowMap->bindForWriting();
 	glClear(GL_DEPTH_BUFFER_BIT);
 #ifdef RENDER_SHADOWS
 	for (const auto& chunk : chunks) {
@@ -262,15 +262,16 @@ void render() {
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
 #endif
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Second Pass (render refraction texture)
+	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
 	chunkShader->setUniform("waterPlaneHeight", WaterRenderer::get()->getY());
 	chunkShader->setUniform("lightSpaceMatrix", shadowMap->getMVP());
 	chunkTexture->bind(Texture::UNIT_0);
-	shadowMap->bindTexture(Texture::UNIT_1);
-	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
+	shadowMap->bindForReading();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CLIP_DISTANCE0);
 	for (const auto& chunk : chunks) {
@@ -278,11 +279,9 @@ void render() {
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
 	}
 	glDisable(GL_CLIP_DISTANCE0);
-
-	
-	// Render chunks
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	shadowMap->bindTexture(Texture::UNIT_1);
+
+	// Render chunks
 	for (const auto& chunk : chunks) {
 		glBindVertexArray(chunk.second.getVao());
 		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());

@@ -18,7 +18,8 @@ public:
 	uint32 getFbo() const { return m_shadowFBO; }
 	glm::mat4 getMVP() const { return m_lightSpaceMVP; }
 
-	void bindTexture(Texture::Unit unit);
+	void bindForWriting();
+	void bindForReading();
 
 	~ShadowMap();
 private:
