@@ -262,6 +262,15 @@ void render() {
 	}
 	glDisable(GL_POLYGON_OFFSET_FILL);
 
+	// Cull chunks not visible to the camera
+	std::vector<const Chunk*> visibleChunks;
+	for (const auto& chunk : chunks) {
+		if (RenderingContext::get()->camera.intersectsFrustum(chunk.second)) {
+			visibleChunks.push_back(&chunk.second);
+		}
+	}
+	std::cout << visibleChunks.size() << std::endl;
+
 	// Second Pass (render refraction texture)
 	chunkShader->use();
 	chunkShader->setUniform("vpMatrix", RenderingContext::get()->camera.getViewProjectionMatrix());
@@ -273,9 +282,9 @@ void render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CLIP_DISTANCE0);
-	for (const auto& chunk : chunks) {
-		glBindVertexArray(chunk.second.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	for (const auto& chunk : visibleChunks) {
+		glBindVertexArray(chunk->getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk->getBlockCount());
 	}
 	glDisable(GL_CLIP_DISTANCE0);
 
@@ -284,9 +293,9 @@ void render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, shadowMap->getTexture());
-	for (const auto& chunk : chunks) {
-		glBindVertexArray(chunk.second.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	for (const auto& chunk : visibleChunks) {
+		glBindVertexArray(chunk->getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk->getBlockCount());
 
 #ifdef COMPILE_DRAW_NORMALS
 		chunkNormalsShader->use();
@@ -296,8 +305,8 @@ void render() {
 	}
 
 	// Render water
-	for (const auto& chunk : chunks) {
-		glm::vec3 pos = chunk.second.getPosition();
+	for (const auto& chunk : visibleChunks) {
+		glm::vec3 pos = chunk->getPosition();
 
 		// Render water
 		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
