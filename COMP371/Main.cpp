@@ -269,7 +269,7 @@ void render() {
 			visibleChunks.push_back(&chunk.second);
 		}
 	}
-	std::cout << visibleChunks.size() << std::endl;
+	//std::cout << visibleChunks.size() << std::endl;
 
 	// Second Pass (render refraction texture)
 	chunkShader->use();

@@ -22,7 +22,9 @@ private:
 	// 1: bottom plane
 	// 2: left plane
 	// 3: right plane
-	glm::vec4 m_frustum[4];
+	// 4: near plane
+	// 5: far plane
+	glm::vec4 m_frustum[6];
 	float32 m_near;
 	float32 m_far;
 
