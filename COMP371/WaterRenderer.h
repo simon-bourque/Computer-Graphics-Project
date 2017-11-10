@@ -6,6 +6,8 @@
 
 #include "Chunk.h"
 
+#include "LightSource.h"
+
 class ShaderProgram;
 class Texture;
 
@@ -43,6 +45,8 @@ public:
 
 	float32 getY() const { return m_y; };
 	uint32 getRefractionFBO() const { return m_refractionFBO; };
+
+	void setLightUniforms(const LightSource& light);
 
 	static void init() { s_instance = new WaterRenderer(); };
 	static WaterRenderer* get() { return s_instance; };
