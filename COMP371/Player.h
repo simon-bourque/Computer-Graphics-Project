@@ -16,9 +16,18 @@ public:
 
 private:
 	void checkChunk();
-	void checkForSurroundingBlocks();
+	bool checkForSurroundingBlocks();
+
+	void onKey(int32 key, int32 action);
+	bool m_forwardPressed;
+	bool m_backwardPressed;
+	bool m_leftPressed;
+	bool m_rightPressed;
+	bool m_upPressed;
+	bool m_downPressed;
 
 	glm::vec3 m_position;
+	glm::vec3 m_last_valid_global_position;
 	glm::vec3 m_chunkPosition;
 	std::vector<glm::vec3> m_chunkPositions;
 };

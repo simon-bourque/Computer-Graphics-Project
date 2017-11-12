@@ -81,7 +81,11 @@ int main() {
 
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
-	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
+	// Player
+	gPlayer = new Player();
+	gPlayer->transform.translateLocal(0, 160, 2);
+
+	//RenderingContext::get()->camera.transform.translateLocal(0,160,2);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Load face data for shader
@@ -103,10 +107,6 @@ int main() {
 	chunkShader->setUniform("lightDirection", sun.getDirection());
 	chunkShader->setUniform("ambientStrength", sun.getAmbStrength());
 	chunkShader->setUniform("specularStrength", sun.getSpecStrength());
-
-	// Player
-	gPlayer = new Player();
-	gPlayer->transform = &(RenderingContext::get()->camera.transform);
 
 	initTestCube();
 
@@ -187,8 +187,14 @@ GLFWwindow* initGLFW() {
 void update(float32 deltaSeconds) {
 	// Update logic...
 	gCameraController->update(deltaSeconds);
-
 	gPlayer->update(deltaSeconds);
+
+
+	RenderingContext::get()->camera.transform = gPlayer->transform;
+	RenderingContext::get()->camera.transform.translateLocal(0.0f, 2.0f, 0.0f);
+	//RenderingContext::get()->camera.transform.xPos = gPlayer->transform.xPos;
+	//RenderingContext::get()->camera.transform.yPos = gPlayer->transform.yPos + 2.0f;
+	//RenderingContext::get()->camera.transform.zPos = gPlayer->transform.zPos;
 
 	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
 

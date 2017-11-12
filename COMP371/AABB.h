@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 
-
 /*
 * Box is defined by point Max and point Min
 * P represents the 'origin' of a voxel
@@ -31,7 +30,7 @@ struct AABB {
 		, pointMax(pointMax)
 	{}
 
-	AABB(const glm::vec3 bottomCorner, const int& l)
+	AABB(const glm::vec3& bottomCorner, const int& l)
 	{
 		pointMin = glm::vec3(bottomCorner.x, bottomCorner.y, bottomCorner.z + l);
 		pointMax = glm::vec3(bottomCorner.x + 1, bottomCorner.y + l, bottomCorner.z);
@@ -55,7 +54,7 @@ struct AABB {
 		return insideX && insideY && insideZ;
 	}
 
-	static bool checkPointInAABB(const glm::vec3 point, const AABB& box)
+	static bool checkPointInAABB(const glm::vec3& point, const AABB& box)
 	{
 		bool insideX = point.x >= box.pointMin.x && point.x <= box.pointMax.x;
 		bool insideY = point.y >= box.pointMin.y && point.y <= box.pointMax.y;
