@@ -264,6 +264,15 @@ void render() {
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	// Cull chunks not visible to the camera
+	std::vector<const Chunk*> visibleChunks;
+	for (const auto& chunk : chunks) {
+		if (RenderingContext::get()->camera.intersectsFrustum(chunk.second)) {
+			visibleChunks.push_back(&chunk.second);
+		}
+	}
+	//std::cout << visibleChunks.size() << std::endl;
+
 	// Second Pass (render refraction texture)
 	glBindFramebuffer(GL_FRAMEBUFFER, WaterRenderer::get()->getRefractionFBO());
 	chunkShader->use();
@@ -275,30 +284,30 @@ void render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #ifdef RENDER_WATER
 	glEnable(GL_CLIP_DISTANCE0);
-	for (const auto& chunk : chunks) {
-		glBindVertexArray(chunk.second.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	for (const auto& chunk : visibleChunks) {
+		glBindVertexArray(chunk->getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk->getBlockCount());
 	}
 	glDisable(GL_CLIP_DISTANCE0);
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Render chunks
-	for (const auto& chunk : chunks) {
-		glBindVertexArray(chunk.second.getVao());
-		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+	for (const auto& chunk : visibleChunks) {
+		glBindVertexArray(chunk->getVao());
+		glDrawElementsInstanced(GL_TRIANGLES, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk->getBlockCount());
 
 #ifdef COMPILE_DRAW_NORMALS
 		chunkNormalsShader->use();
-		glDrawElementsInstanced(GL_POINTS, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk.second.getBlockCount());
+		glDrawElementsInstanced(GL_POINTS, cube::numIndices, GL_UNSIGNED_INT, nullptr, chunk->getBlockCount());
 		chunkShader->use();
 #endif
 	}
 
 	// Render water
-#ifdef RENDER_WATER
-	for (const auto& chunk : chunks) {
-		glm::vec3 pos = chunk.second.getPosition();
+  #ifdef RENDER_WATER
+	for (const auto& chunk : visibleChunks) {
+		glm::vec3 pos = chunk->getPosition();
 
 		// Render water
 		WaterRenderer::get()->render(pos.x, pos.z, ChunkManager::CHUNKWIDTH);
