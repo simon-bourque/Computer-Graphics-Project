@@ -1,7 +1,10 @@
 # Stygian Engine Contribution Guidelines
 
-## Styleguide 
+If you would like to contribute to this project directly, please contact the owner of this repository to be potentially added as a contributor. What follows is a set of guidelines to follow if you do decide to help us. Although we have a defined coding style, a lot is left to the coders themselves so use your best judgement!
 
+### Table of Contents 
+
+#### [Styleguide](#styleguide)
 * [Formatting](#formatting)
 
 * [Classes](#classes)
@@ -13,6 +16,8 @@
 * [Comments](#comments)
 
 * [Namespace](#namespace)
+
+### Styleguide
 
 ***
 
