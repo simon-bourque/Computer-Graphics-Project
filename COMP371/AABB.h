@@ -33,7 +33,7 @@ struct AABB {
 	AABB(const glm::vec3& bottomCorner, const int& l)
 	{
 		pointMin = glm::vec3(bottomCorner.x, bottomCorner.y, bottomCorner.z + l);
-		pointMax = glm::vec3(bottomCorner.x + 1, bottomCorner.y + l, bottomCorner.z);
+		pointMax = glm::vec3(bottomCorner.x + l, bottomCorner.y + l, bottomCorner.z);
 	}
 
 	static AABB centeredOnPoint(const glm::vec3& center, const int& l)
