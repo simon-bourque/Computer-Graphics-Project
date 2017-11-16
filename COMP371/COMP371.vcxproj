@@ -167,6 +167,7 @@
     <ClInclude Include="ShaderCache.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />
