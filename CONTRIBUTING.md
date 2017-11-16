@@ -56,7 +56,7 @@ Function names should be written in camel case starting with a lowercase letter.
 ***
 
 ## Comments
-Comments are written with the standard "// " (note the space). Comments are to be written if the function or variable is not straightforward. This is left to the individual programmer to judge. For example, getters and setters do NOT need comments. If a function is large and confusing, put a multiline comment before the function name explaining what it does and its different variables and parameters.
+Comments are written with the standard "// " (note the space) or multiline equivalent. Comments are to be written if the function or variable is not straightforward. This is left to the individual programmer to judge. For example, getters and setters do NOT need comments. If a function is large and confusing, put a multiline comment before the function name in the .cpp file explaining what it does and its different variables and parameters.
 
 ***
 
