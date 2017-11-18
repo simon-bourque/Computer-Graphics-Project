@@ -42,7 +42,7 @@ public:
 	glm::vec3 getForward() const { return glm::rotate(transform.rotation, glm::vec3(0, 0, -1)); };
 	glm::vec3 getUp() const { return glm::rotate(transform.rotation, glm::vec3(0, 1, 0)); };
 
-	void setPerspective(float32 fov, float32 aspectRatio, float32 near, float32 far);
+	void setPerspective(float32 fov, float32 aspectRatio, float32 nearPlane = 0.1f, float32 farPlane = 1000.0f);
 
 	bool intersectsFrustum(const Chunk& chunk);
 };

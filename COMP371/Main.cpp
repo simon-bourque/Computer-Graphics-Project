@@ -33,6 +33,8 @@
 
 #include "WaterRenderer.h"
 
+#include "InputManager.h"
+
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
 void render();
@@ -62,6 +64,8 @@ Texture* skyboxTexture = nullptr;
 GLFWwindow* gWindow = nullptr;
 FreeCameraController* gCameraController;
 
+bool gFullscreen = false;
+
 //#define COMPILE_DRAW_NORMALS // Uncomment me if you want to render normals
 
 #ifdef COMPILE_DRAW_NORMALS
@@ -78,7 +82,39 @@ int main() {
 		// Initialize GLFW
 		gWindow = initGLFW();
 
+		// Set fullscreen toggle
+		InputManager::instance()->registerKeyCallback([](int32 key, int32 action) { 
+			if (key == GLFW_KEY_F2 && action == GLFW_PRESS) {
+				if (gFullscreen) {
+					const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+					
+					// Set size slightly smaller than fullscreen and center the window.
+					int32 width = videoMode->width * 0.9;
+					int32 height = videoMode->height * 0.9;
+					int32 x = (videoMode->width - width) / 2.0;
+					int32 y = (videoMode->height - height) / 2.0;
+					
+					glfwSetWindowMonitor(gWindow, NULL, x, y, width, height, 0);
+					gFullscreen = false;
+				}
+				else {
+					GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+					const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
+					glfwSetWindowMonitor(gWindow, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
+					gFullscreen = true;
+				}
+			}
+		});
+
+		// Close application when esc is pressed
+		InputManager::instance()->registerKeyCallback([](int32 key, int32 action) {
+			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+				glfwSetWindowShouldClose(gWindow, 1);
+			}
+		});
+
 		RenderingContext::init();
+		RenderingContext::get()->camera.setPerspective(45, SCREENWIDTH/(float32)SCREENHEIGHT);
 		chunkShader = RenderingContext::get()->shaderCache.loadShaderProgram("chunk_shader", "chunk_vert.glsl", "chunk_frag.glsl");
 		chunkTexture = RenderingContext::get()->textureCache.loadTexture2DArray("chunk_texture", 7, "tiles.png");
 
@@ -188,7 +224,18 @@ GLFWwindow* initGLFW() {
 	// 8x MSAA
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
+	GLFWwindow* window = nullptr;
+
+	if (gFullscreen) {
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
+		SCREENWIDTH = videoMode->width;
+		SCREENHEIGHT = videoMode->height;
+		window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", monitor, nullptr);
+	}
+	else {
+		window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Final Project", nullptr, nullptr);
+	}
 
 	if (!window) {
 		glfwTerminate();
@@ -199,12 +246,19 @@ GLFWwindow* initGLFW() {
 	glfwSwapInterval(1);
 
 	
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { 
+	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
+		
+		// Width and height are 0 when we alt-tab while in fullscreen, I have no idea why it's done that way.
+		if (width == 0 || height == 0) {
+			return;
+		}
+
 		glViewport(0, 0, width, height);
 		WaterRenderer::get()->resizeFBO(width, height);
 		shadowMap->updateSize(width, height);
 		SCREENWIDTH = width;
 		SCREENHEIGHT = height;
+		RenderingContext::get()->camera.setPerspective(45, SCREENWIDTH / (float32)SCREENHEIGHT);
 	});
 
 	return window;
