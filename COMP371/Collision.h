@@ -1,6 +1,6 @@
 #pragma once
 
-enum Collision { NoCollision, Colliding, CollidingNotY };
+enum Collision { NoCollision, Colliding, CollidingNotY, NoCollisionUpOne };
 
 enum CollisionMode { AABB, Sphere };
 

@@ -92,8 +92,12 @@ void Player::update(float32 deltaSeconds)
 			transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
 		break;
 	case(Collision::CollidingNotY):
-		if (dx != 0 || dy != 0 || dz != 0)
+		if (dx != 0 || dz != 0)
 			transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
+		break;
+	case(Collision::NoCollisionUpOne):
+		if (dx != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, 1.0f, deltaPos.z);
 		break;
 	}
 
@@ -134,6 +138,7 @@ void Player::checkChunk()
 Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const float32& currentY)
 {
 	glm::vec3 noY = glm::vec3(newPosition.x, currentY, newPosition.z);
+	glm::vec3 upOne = glm::vec3(newPosition.x, currentY + 1.0f, newPosition.z);
 	if (m_collisionMode == CollisionMode::AABB)
 	{
 		/*
@@ -160,6 +165,7 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 	{
 		SphereCollider meAll = SphereCollider(newPosition, 0.5f);
 		SphereCollider meNoY = SphereCollider(noY, 0.5f);
+		SphereCollider meUpOne = SphereCollider(upOne, 0.5f);
 		if (m_chunkPositions.size() > 0)
 		{
 			for (auto& it : m_chunkPositions)
@@ -168,7 +174,13 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 				if (SphereCollider::checkCollision(meAll, other))
 				{
 					if (SphereCollider::checkCollision(meNoY, other))
-						return Collision::Colliding;
+					{
+						if (SphereCollider::checkCollision(meUpOne, other))
+							return Collision::Colliding;
+						else
+							return Collision::NoCollisionUpOne;
+						
+					}
 					else
 						return Collision::CollidingNotY;
 				}
