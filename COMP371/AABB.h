@@ -19,12 +19,6 @@
 */
 
 struct AABB {
-	AABB(const glm::vec3& center, const int& sideLength, const bool& dummy)
-	{
-		pointMin = glm::vec3(center.x, center.y, center.z);
-		pointMax = glm::vec3(center.x, center.y, center.z);
-	}
-
 	AABB(const glm::vec3& pointMin, const glm::vec3& pointMax)
 		: pointMin(pointMin)
 		, pointMax(pointMax)

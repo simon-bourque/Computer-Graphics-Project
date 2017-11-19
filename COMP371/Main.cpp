@@ -26,9 +26,11 @@
 
 #include <vector>
 
+#include "InputManager.h"
+
 #include "FreeCameraController.h"
 #include "Player.h"
-#include "AABB.h"
+#include "Collision.h"
 
 GLFWwindow* initGLFW();
 void update(float32 deltaSeconds);
@@ -47,7 +49,11 @@ ShaderProgram* chunkShader = nullptr;
 Texture* chunkTexture = nullptr;
 
 GLFWwindow* gWindow = nullptr;
+
+bool FREE_CAM_ON = false;
+glm::vec3 camPositionVector;
 FreeCameraController* gCameraController;
+bool PLAYER_COLLISION_AABB = false;
 Player* gPlayer;
 
 //#define COMPILE_DRAW_NORMALS // Uncomment me if you want to render normals
@@ -79,13 +85,36 @@ int main() {
 		return 1;
 	}
 
+	// FreeCam
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
 
 	// Player
-	gPlayer = new Player();
+	gPlayer = new Player(&RenderingContext::get()->camera);
 	gPlayer->transform.translateLocal(0, 160, 2);
 
-	//RenderingContext::get()->camera.transform.translateLocal(0,160,2);
+	InputManager::instance()->registerKeyCallback([](int32 key, int32 action) {
+			if (key == GLFW_KEY_F3 && action == GLFW_PRESS)
+			{
+				FREE_CAM_ON = !FREE_CAM_ON;
+				if (FREE_CAM_ON)
+					std::cout << "Switched to Controlling FreeCam" << std::endl;
+				else
+					std::cout << "Switched to Controlling Player" << std::endl;
+			}
+			if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
+			{
+				PLAYER_COLLISION_AABB = !PLAYER_COLLISION_AABB;
+
+				gPlayer->setCollisionMode(PLAYER_COLLISION_AABB ? CollisionMode::AABB : CollisionMode::Sphere);
+
+				if(PLAYER_COLLISION_AABB)
+					std::cout << "Switched to Player Collision AABB testing" << std::endl;
+				else
+					std::cout << "Switched to Player Collision Sphere testing" << std::endl;
+			}
+		});
+
+	RenderingContext::get()->camera.transform.translateLocal(0,160,2);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
 
 	// Load face data for shader
@@ -116,15 +145,6 @@ int main() {
 	float64 delta = 0;
 	float64 currentTime = 0;
 
-	//AABB b1(glm::vec3(0.0f,0.0f,0.0f), 1);
-	//AABB b2(glm::vec3(0.5f,1.0f,1.0f), 1);
-
-	//bool bb = AABB::checkCollision(b1, b2);
-	//std::cout << "col1 " << b << std::endl;
-
-	//bool bp = AABB::checkPointInAABB(glm::vec3(0.1f,0.1f,0.1f), b1);
-	//std::cout << "col2 " << bp << std::endl;
-
 	while (!glfwWindowShouldClose(gWindow)) {
 		glfwPollEvents();
 
@@ -152,9 +172,8 @@ int main() {
 	delete gPlayer;
 
 	RenderingContext::destroy();
-	
-	glfwTerminate();
 
+	glfwTerminate();
 
 	return 0;
 }
@@ -178,7 +197,6 @@ GLFWwindow* initGLFW() {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void { glViewport(0, 0, width, height); });
 
 	return window;
@@ -186,15 +204,10 @@ GLFWwindow* initGLFW() {
 
 void update(float32 deltaSeconds) {
 	// Update logic...
-	gCameraController->update(deltaSeconds);
-	gPlayer->update(deltaSeconds);
-
-
-	RenderingContext::get()->camera.transform = gPlayer->transform;
-	RenderingContext::get()->camera.transform.translateLocal(0.0f, 2.0f, 0.0f);
-	//RenderingContext::get()->camera.transform.xPos = gPlayer->transform.xPos;
-	//RenderingContext::get()->camera.transform.yPos = gPlayer->transform.yPos + 2.0f;
-	//RenderingContext::get()->camera.transform.zPos = gPlayer->transform.zPos;
+	if(FREE_CAM_ON)
+		gCameraController->update(deltaSeconds);
+	else
+		gPlayer->update(deltaSeconds);
 
 	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
 
@@ -208,7 +221,17 @@ void update(float32 deltaSeconds) {
 	ChunkManager::instance()->uploadQueuedChunk();
 
 	chunkShader->use();
-	chunkShader->setUniform("viewPos", gPlayer->getPosition());
+	if (FREE_CAM_ON)
+	{
+		camPositionVector = glm::vec3(RenderingContext::get()->camera.transform.xPos,
+			RenderingContext::get()->camera.transform.yPos,
+			RenderingContext::get()->camera.transform.zPos);
+		chunkShader->setUniform("viewPos", camPositionVector);
+	}
+	else
+	{
+		chunkShader->setUniform("viewPos", gPlayer->getPosition());
+	}
 }
 
 void render() {

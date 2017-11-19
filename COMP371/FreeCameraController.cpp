@@ -24,14 +24,12 @@ FreeCameraController::FreeCameraController(Camera* camera) :
 	InputManager::instance()->registerMouseBtnCallback(std::bind(&FreeCameraController::onMouseButton, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-
 FreeCameraController::~FreeCameraController() {}
 
 void FreeCameraController::update(float32 deltaSeconds) {
 	const static float32 SPEED = 100.0f;
 	const static float32 ROTATE_SPEED = 0.01f;
 
-	/*
 	float32 dx = 0;
 	float32 dy = 0;
 	float32 dz = 0;
@@ -61,7 +59,6 @@ void FreeCameraController::update(float32 deltaSeconds) {
 	if (dx != 0 || dy != 0 || dz != 0) {
 		m_camera->transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
 	}
-	*/
 
 	// ###############################
 	glm::vec2 mouseAxis = getMouseAxis() * ROTATE_SPEED;
@@ -92,7 +89,6 @@ void FreeCameraController::update(float32 deltaSeconds) {
 }
 
 void FreeCameraController::onKey(int32 key, int32 action) {
-	/*
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS) {
 			m_forwardPressed = true;
@@ -141,7 +137,6 @@ void FreeCameraController::onKey(int32 key, int32 action) {
 			m_downPressed = false;
 		}
 	}
-	*/
 	if (key == GLFW_KEY_Q) {
 		if (action == GLFW_PRESS) {
 			m_rollLeftPressed = true;

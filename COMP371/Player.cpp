@@ -3,18 +3,27 @@
 #include "Player.h"
 #include "ChunkManager.h"
 #include "AABB.h"
+#include "SphereCollider.h"
 #include "InputManager.h"
 
-Player::Player()
-	: m_position(glm::vec3(0.0f))
+glm::vec2 getMouseAxis();
+
+Player::Player(Camera* camera)
+	: m_camera(camera)
+	, m_position(glm::vec3(0.0f))
 	, m_forwardPressed(false)
 	, m_backwardPressed(false)
 	, m_leftPressed(false)
 	, m_rightPressed(false)
-	, m_upPressed(false)
-	, m_downPressed(false)
+	, m_jumpPressed(false)
+	, m_rightMouseButtonPressed(false)
+	, m_isJumping(false)
+	, m_ready(false)
+	, m_jumpedFrames(0)
+	, m_collisionMode(CollisionMode::Sphere)
 {
 	InputManager::instance()->registerKeyCallback(std::bind(&Player::onKey, this, std::placeholders::_1, std::placeholders::_2));
+	InputManager::instance()->registerMouseBtnCallback(std::bind(&Player::onMouseButton, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 Player::~Player() {}
@@ -23,8 +32,8 @@ void Player::update(float32 deltaSeconds)
 {
 	const static float32 SPEED = 100.0f;
 	const static float32 ROTATE_SPEED = 0.01f;
+	const static int MAX_JUMP_FRAMES = 15;
 
-	// last position;
 	m_position = glm::vec3(transform.xPos, transform.yPos, transform.zPos);
 
 	float32 dx = 0;
@@ -43,41 +52,70 @@ void Player::update(float32 deltaSeconds)
 	if (m_rightPressed) {
 		++dx;
 	}
-	if (m_upPressed) {
-		++dy;
+	if (m_jumpPressed) {
+		if (!m_isJumping)
+			m_isJumping = true;
 	}
-	if (m_downPressed) {
-		--dy;
+
+	if(m_ready && !m_isJumping)
+		dy += GRAVITY * deltaSeconds;
+	else if (m_ready && m_isJumping)
+	{
+		dy -= GRAVITY * deltaSeconds;
+		m_jumpedFrames++;
+
+		if (m_jumpedFrames > MAX_JUMP_FRAMES)
+		{
+			m_jumpedFrames = 0;
+			m_isJumping = false;
+		}
 	}
 
 	glm::vec3 deltaPos(dx, dy, dz);
 	deltaPos = (glm::normalize(deltaPos) * SPEED * deltaSeconds);
-
-	if (dx != 0 || dy != 0 || dz != 0)
-	{
-		transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
-	}
-
-	//std::cout << "Player at (" << m_position.x << "," << m_position.y << "," << m_position.z << ")" << std::endl;
+	deltaPos = glm::clamp(deltaPos, -0.9f, 0.9f);
 
 	//Check if the chunk you are in has changed
 	checkChunk();
 
-	//Bruteforce check for collision
-	bool coll = checkForSurroundingBlocks();
+	glm::vec3 newPosition = glm::vec3(transform.xPos + deltaPos.x, transform.yPos + deltaPos.y, transform.zPos + deltaPos.z);
+	
+	Collision coll = checkForSurroundingBlocks(newPosition, transform.yPos);
 
-	if (coll)
+	switch (coll)
 	{
+	case(Collision::Colliding):
 		std::cout << "Colliding" << std::endl;
-		transform.xPos = m_last_valid_global_position.x;
-		transform.yPos = m_last_valid_global_position.y;
-		transform.zPos = m_last_valid_global_position.z;
+		break;
+	case(Collision::NoCollision):
+		if (dx != 0 || dy != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
+		break;
+	case(Collision::CollidingNotY):
+		if (dx != 0 || dy != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
+		break;
+	}
 
+	m_camera->transform.xPos = transform.xPos;
+	m_camera->transform.yPos = transform.yPos + 2.0f;
+	m_camera->transform.zPos = transform.zPos;
+
+	glm::vec2 mouseAxis = getMouseAxis() * ROTATE_SPEED;
+	if (m_rightMouseButtonPressed) {
+
+		if (abs(mouseAxis.x) > abs(mouseAxis.y)) {
+			mouseAxis.y = 0;
+		}
+		else {
+			mouseAxis.x = 0;
+		}
+
+		m_camera->transform.rotateLocal(mouseAxis.y, 0, 0);
+		m_camera->transform.rotate(0, -mouseAxis.x, 0);
 	}
-	else
-	{
-		m_last_valid_global_position = m_position;
-	}
+
+	//std::cout << "Player at (" << m_position.x << "," << m_position.y << "," << m_position.z << ")" << std::endl;
 }
 
 void Player::checkChunk()
@@ -93,19 +131,52 @@ void Player::checkChunk()
 	}
 }
 
-bool Player::checkForSurroundingBlocks()
+Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const float32& currentY)
 {
-	AABB me = AABB::centeredOnPoint(m_position, 1);
-	if (m_chunkPositions.size() > 0)
+	glm::vec3 noY = glm::vec3(newPosition.x, currentY, newPosition.z);
+	if (m_collisionMode == CollisionMode::AABB)
 	{
-		for (auto& it : m_chunkPositions)
+		/*
+		AABB me = AABB::centeredOnPoint(newPosition, 1.0f);
+		AABB me2 = AABB::centeredOnPoint(noY, 1.0f);
+		
+		if (m_chunkPositions.size() > 0)
 		{
-			AABB other = AABB(it, 2);
-			if(AABB::checkCollision(me, other))
-				return true;
+			for (auto& it : m_chunkPositions)
+			{
+				AABB other = AABB(it, 1.0f);
+				if (AABB::checkCollision(me, other))
+				{
+					if (AABB::checkCollision(me2, other))
+						return Collision::Colliding;
+					else
+						return Collision::CollidingNotY;
+				}
+			}
+		}
+		*/
+	}
+	else
+	{
+		SphereCollider meAll = SphereCollider(newPosition, 0.5f);
+		SphereCollider meNoY = SphereCollider(noY, 0.5f);
+		if (m_chunkPositions.size() > 0)
+		{
+			for (auto& it : m_chunkPositions)
+			{
+				SphereCollider other = SphereCollider::centeredOnVoxel(it);
+				if (SphereCollider::checkCollision(meAll, other))
+				{
+					if (SphereCollider::checkCollision(meNoY, other))
+						return Collision::Colliding;
+					else
+						return Collision::CollidingNotY;
+				}
+			}
 		}
 	}
-	return false;
+
+	return Collision::NoCollision;
 }
 
 void Player::onKey(int32 key, int32 action)
@@ -144,18 +215,26 @@ void Player::onKey(int32 key, int32 action)
 	}
 	if (key == GLFW_KEY_SPACE) {
 		if (action == GLFW_PRESS) {
-			m_upPressed = true;
+			m_jumpPressed = true;
 		}
 		else if (action == GLFW_RELEASE) {
-			m_upPressed = false;
+			m_jumpPressed = false;
 		}
 	}
-	if (key == GLFW_KEY_LEFT_CONTROL) {
+	if (key == GLFW_KEY_ENTER) {
 		if (action == GLFW_PRESS) {
-			m_downPressed = true;
+			m_ready = true;
+		}
+	}
+}
+void Player::onMouseButton(int32 button, int32 action)
+{
+	if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+		if (action == GLFW_PRESS) {
+			m_rightMouseButtonPressed = true;
 		}
 		else if (action == GLFW_RELEASE) {
-			m_downPressed = false;
+			m_rightMouseButtonPressed = false;
 		}
 	}
 }
