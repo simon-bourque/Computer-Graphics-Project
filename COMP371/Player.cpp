@@ -163,9 +163,9 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 	}
 	else
 	{
-		SphereCollider meAll = SphereCollider(newPosition, 0.5f);
-		SphereCollider meNoY = SphereCollider(noY, 0.5f);
-		SphereCollider meUpOne = SphereCollider(upOne, 0.5f);
+		SphereCollider meAll = SphereCollider(newPosition, 1.0f);
+		SphereCollider meNoY = SphereCollider(noY, 1.0f);
+		SphereCollider meUpOne = SphereCollider(upOne, 1.0f);
 		if (m_chunkPositions.size() > 0)
 		{
 			for (auto& it : m_chunkPositions)
