@@ -359,7 +359,8 @@ void render() {
 	}
 
 	// Render water
-  #ifdef RENDER_WATER
+#ifdef RENDER_WATER
+	WaterRenderer::get()->prepare();
 	for (const auto& chunk : visibleChunks) {
 		glm::vec3 pos = chunk->getPosition();
 

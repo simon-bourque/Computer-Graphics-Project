@@ -115,15 +115,18 @@ void WaterRenderer::buildFBO(uint32 width, uint32 height) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void WaterRenderer::render(float32 x, float32 z, float32 scale) {
+void WaterRenderer::prepare() {
 	m_waterShader->use();
 	glBindVertexArray(m_vao);
 	m_waterNormal->bind(Texture::UNIT_0);
 	m_waterNormal2->bind(Texture::UNIT_1);
 	m_waterDuDv->bind(Texture::UNIT_2);
-	
+
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_refractionColorTexture);
+}
+
+void WaterRenderer::render(float32 x, float32 z, float32 scale) {
 
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, m_y, z)) * glm::scale(glm::mat4(1.0f), glm::vec3(scale, 0.0f, scale));
 
