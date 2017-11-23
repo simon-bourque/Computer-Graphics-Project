@@ -41,6 +41,7 @@ public:
 	void resizeFBO(uint32 width, uint32 height);
 	void buildFBO(uint32 width, uint32 height);
 	
+	void prepare();
 	void render(float32 x, float32 z, float32 scale);
 
 	float32 getY() const { return m_y; };
