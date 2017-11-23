@@ -33,7 +33,9 @@ void Player::update(float32 deltaSeconds)
 	const static float32 SPEED = 100.0f;
 	const static float32 ROTATE_SPEED = 0.01f;
 	const static int MAX_JUMP_FRAMES = 15;
-	
+
+	static bool hasLanded = false;
+
 	m_position = glm::vec3(transform.xPos, transform.yPos, transform.zPos);
 
 	float32 dx = 0;
@@ -53,8 +55,11 @@ void Player::update(float32 deltaSeconds)
 		++dx;
 	}
 	if (m_jumpPressed) {
-		if (!m_isJumping)
+		if (!m_isJumping && hasLanded)
+		{
 			m_isJumping = true;
+			hasLanded = false;
+		}
 	}
 
 	if(m_ready && !m_isJumping)
@@ -86,6 +91,7 @@ void Player::update(float32 deltaSeconds)
 	{
 	case(Collision::Colliding):
 		std::cout << "Colliding" << std::endl;
+		hasLanded = true;
 		break;
 	case(Collision::NoCollision):
 		if (dx != 0 || dy != 0 || dz != 0)
@@ -94,10 +100,12 @@ void Player::update(float32 deltaSeconds)
 	case(Collision::CollidingNotY):
 		if (dx != 0 || dz != 0)
 			transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
+		hasLanded = true;
 		break;
 	case(Collision::NoCollisionUpOne):
 		if (dx != 0 || dz != 0)
 			transform.translateLocal(deltaPos.x, 1.0f, deltaPos.z);
+		hasLanded = true;
 		break;
 	}
 
