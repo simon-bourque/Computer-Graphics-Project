@@ -30,6 +30,15 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 	return shadow;
 }
 
+vec4 FogCalculation(vec4 tempColor, float dist, vec3 viewDir)
+{
+	const float density = 0.008;
+	float fogAmount = (1.0 - exp( -dist*density))*(1.0 - exp( -dist*density));
+	float sunAmount = max( dot( viewDir,-lightDirection ), 0.0 );
+    vec3  fogColor  = mix( vec3(0.588235,0.74118,0.99608),lightColor, pow(sunAmount,8.0) ); // Scatter sunlight color near sun pos
+	return mix( tempColor, vec4(fogColor,1.0), fogAmount );
+}
+
 void main() {
 
 	vec4 tempColor = texture(tilesheet, vec3(passFromVertex.UvCoords.x, passFromVertex.UvCoords.y, passFromVertex.faceIndex));
@@ -51,8 +60,8 @@ void main() {
 	vec3 specular = vec3(0.0, 0.0, 0.0);
 	
 	// Should not add a specular component when the diffuse dot product is 0
+	vec3 viewDir = normalize(viewPos - vec3(passFromVertex.fragPos));
 	if (diff != 0.0) {
-		vec3 viewDir = normalize(viewPos - vec3(passFromVertex.fragPos));
 		vec3 reflectDir = reflect(-lightDirection, passFromVertex.normal);
 		float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 		specular = specularCoefficient * spec * lightColor;
@@ -61,6 +70,11 @@ void main() {
 	float shadowFactor = ShadowCalculation(passFromVertex.fragPosLightSpace);
 	tempColor = vec4((ambient + (1.0 - shadowFactor) * (diffuse + specular)), 1.0f) * tempColor;
 	
+	// Add Fog if blocks are far enough
+	float dist = distance(viewPos, vec3(passFromVertex.fragPos));
+	const float fogRenderMinDist = 100;
+	if(dist > fogRenderMinDist)
+		tempColor = FogCalculation(tempColor, dist - fogRenderMinDist, viewDir);
 
-	finalColor = clamp(tempColor, 0.0, 1.0);
+	finalColor =  clamp(tempColor, 0.0, 1.0);
 }
