@@ -33,7 +33,7 @@ void Player::update(float32 deltaSeconds)
 	const static float32 SPEED = 100.0f;
 	const static float32 ROTATE_SPEED = 0.01f;
 	const static int MAX_JUMP_FRAMES = 15;
-
+	
 	m_position = glm::vec3(transform.xPos, transform.yPos, transform.zPos);
 
 	float32 dx = 0;
@@ -114,6 +114,8 @@ void Player::update(float32 deltaSeconds)
 		else {
 			mouseAxis.x = 0;
 		}
+
+		transform.rotate(0, -mouseAxis.x, 0);
 
 		m_camera->transform.rotateLocal(mouseAxis.y, 0, 0);
 		m_camera->transform.rotate(0, -mouseAxis.x, 0);
