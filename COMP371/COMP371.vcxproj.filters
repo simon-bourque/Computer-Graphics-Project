@@ -35,8 +35,8 @@
     <Filter Include="Graphics\Lighting">
       <UniqueIdentifier>{d2a68858-f17a-48a7-8724-0383c63a9610}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects">
-      <UniqueIdentifier>{dd9d5398-325a-4ad2-bb26-2dd5c81655c9}</UniqueIdentifier>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{77cff4f7-806f-4450-b58f-2a614c21ddaf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -88,11 +88,20 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Graphics\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterRenderer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeBuilder.cpp">
+      <Filter>Core\Procedural</Filter>
+    </ClCompile>
     <ClCompile Include="Entity.cpp">
-      <Filter>Objects</Filter>
+      <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>Objects</Filter>
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -150,20 +159,35 @@
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Objects</Filter>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Graphics\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Objects</Filter>
+    <ClInclude Include="Profiling.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeBuilder.h">
+      <Filter>Core\Procedural</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterRenderer.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="AABB.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="SphereCollider.h">
-      <Filter>Objects</Filter>
+      <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h">
-      <Filter>Objects</Filter>
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +203,12 @@
     <None Include="chunk_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="skybox_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="skybox_vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
     <None Include="shadowmap_frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
@@ -189,6 +219,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="chunk_normals_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="water_vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

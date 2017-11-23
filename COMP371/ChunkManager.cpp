@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include "Primitives.h"
 
+#include "Profiling.h"
+
 constexpr int64 encodePosition(int32 x, int32 z)
 {
 	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
@@ -55,6 +57,8 @@ DWORD WINAPI cmRoutine(LPVOID p)
 
 void ChunkManager::loadChunks(glm::vec3 currentChunk) 
 {
+	INSTRUMENT_FUNCTION("LoadChunks", Profiler::Color::DarkViolet);
+
 	// Unload out of range chunks
 	unloadChunks(currentChunk);
 
@@ -64,7 +68,8 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 	uint32 decrementor = 0;
 
 	//Chunk on player
-	chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+	//chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
+	/*
 	//Middle pass
 	for (uint32 i = 1; i <= LOADINGRADIUS; i++)
 	{
@@ -93,6 +98,14 @@ void ChunkManager::loadChunks(glm::vec3 currentChunk)
 			chunksToLoad.push_back(glm::vec3(currentX, 0, currentZ));
 		}
 		decrementor++;
+	}
+	*/
+	for (int32 i = -LOADINGRADIUS; i <= LOADINGRADIUS; i++)
+	{
+		for (int32 j = -LOADINGRADIUS; j <= LOADINGRADIUS; j++)
+		{
+			chunksToLoad.push_back(glm::vec3(currentX + (j*CHUNKWIDTH), 0, currentZ + (i*CHUNKWIDTH)));
+		}
 	}
 
 	//Check for loaded and loading chunks
@@ -153,6 +166,8 @@ glm::vec3 ChunkManager::fetchQueueIn()
 
 void ChunkManager::uploadQueuedChunk()
 {
+	INSTRUMENT_FUNCTION("UploadChunk", Profiler::Color::AliceBlue);
+
 	cmOutMutex.lock();
 	
 	if (cmOutQueue.empty()) {
@@ -328,11 +343,10 @@ void ChunkManager::unloadChunks(const glm::vec3& currentChunkPos) {
 		float32 dx = currentChunkPos.x - chunk.getPosition().x;
 		float32 dz = currentChunkPos.z - chunk.getPosition().z;
 
-		// Compute the square distances to avoid using sqrt since it is alot more computationally intensive
-		float32 distanceSquared = (dx * dx) + (dz * dz);
-		float32 radiusSquared = LOADINGRADIUS * LOADINGRADIUS * CHUNKWIDTH * CHUNKWIDTH;
+		// Compute the maximum distance at which chunks will be rendered
+		float32 maxDistance = (LOADINGRADIUS * CHUNKWIDTH);
 
-		if (distanceSquared > radiusSquared) {
+		if (abs(dx) > maxDistance || abs(dz) > maxDistance) {
 
 			// Delete vbos
 			const std::vector<uint32>& vbos = chunk.getVbos();

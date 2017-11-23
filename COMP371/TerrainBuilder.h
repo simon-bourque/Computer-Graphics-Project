@@ -16,7 +16,7 @@ public:
 	vector<Block> getChunkBlocks(Chunk chunk);
 private:
 	FastNoise noiseGenerator;
-
+	FastNoise TreeNoiseGenerator;
 	BlockType getBlockType(const float elevation);
 	vector<Block> getChunkHeightmap(Chunk chunk);
 
@@ -24,5 +24,9 @@ private:
 	void duplicateBlockVertically(Block BlockToDuplicate, int heightDifference, vector<Block>& chunkBlocks);
 	glm::vec3 getHeightmapPosition(glm::vec3 xzPosition);
 
+	// TODO see if you could use constexpr on this
+	int closestPrimes[101];
+	bool isPrime(int n);
+	void fillClosestPrimes(int* closestPrimes);
 };
 

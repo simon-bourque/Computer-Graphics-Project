@@ -1,12 +1,20 @@
 #include "TerrainBuilder.h"
 #include "ChunkManager.h"
+#include "TreeBuilder.h"
 
 TerrainBuilder::TerrainBuilder(int seed)
 {
 	noiseGenerator.SetSeed(seed);
 	noiseGenerator.SetNoiseType(FastNoise::PerlinFractal);
-	noiseGenerator.SetFrequency(0.005);
+	noiseGenerator.SetFrequency(0.005f);
 	noiseGenerator.SetFractalOctaves(5);
+
+	TreeNoiseGenerator.SetSeed(seed);
+	TreeNoiseGenerator.SetNoiseType(FastNoise::SimplexFractal);
+	TreeNoiseGenerator.SetFrequency(0.005f);
+	TreeNoiseGenerator.SetFractalOctaves(2);
+
+	fillClosestPrimes(closestPrimes);
 }
 
 TerrainBuilder::~TerrainBuilder()
@@ -31,7 +39,7 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 {
 	// Get chunk origin position instead of center position
 	int chunkSize = ChunkManager::CHUNKWIDTH;
-	glm::vec3 chunkOriginPos = chunk.getPosition() - glm::vec3(chunkSize/2.0f,0, chunkSize / 2.0f); // Assumes chunk y-pos = 0
+	glm::vec3 chunkOriginPos = chunk.getPosition() - glm::vec3(chunkSize / 2.0f, 0, chunkSize / 2.0f); // Assumes chunk y-pos = 0
 	
 	vector<Block> heightmapBlocks;
 	heightmapBlocks.reserve(chunkSize * chunkSize);
@@ -58,9 +66,12 @@ vector<Block> TerrainBuilder::getChunkHeightmap(Chunk chunk)
 
 /**
  *  Modifies vector of blocks so that vertical gaps between adjacents blocks are filled by duplicating highest block down to fill gaps
+ *  Also adds the trees to the terraub
  */
 void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 {
+	TreeBuilder treeGen(&chunkBlocks);
+
 	int chunkWidth = ChunkManager::CHUNKWIDTH;
 	for (int row = 0; row < chunkWidth; row++)
 	{
@@ -97,7 +108,6 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			else
 				upBlockPos = getHeightmapPosition( currBlockPos + glm::vec3(0, 0, 1) );
 
-
 			// Get maximum height difference bw current block and four adjacent blocks
 			float heightDifference = currBlockPos.y - leftBlockPos.y;
 			heightDifference = (heightDifference > currBlockPos.y - rightBlockPos.y) ? heightDifference : currBlockPos.y - rightBlockPos.y;
@@ -107,6 +117,22 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			// Duplicate the current block vertically to fill gaps
 			if (heightDifference > 1.0f)
 				duplicateBlockVertically(chunkBlocks[index], int(nearbyint(heightDifference)), chunkBlocks);
+
+			// Load Tree
+			if (chunkBlocks[index].getBlockType() == BlockType::GRASS)
+			{
+				// Trees are only placed if their positions are at prime numbers (number depends on noise)
+				int noise = ((TreeNoiseGenerator.GetNoise(currBlockPos.x, currBlockPos.z) + 1) * 0.5f * 20) +5 ;
+				if ((int)(currBlockPos.x+0) % closestPrimes[noise] == 0 && (int)(currBlockPos.z+0) % closestPrimes[noise] == 0 &&  currBlockPos.z != 0 && currBlockPos.x != 0)
+					if ((int)leftBlockPos.y == (int)rightBlockPos.y && ((int)upBlockPos.y == (int)downBlockPos.y) && downBlockPos.y == (int)currBlockPos.y && rightBlockPos.y == (int)currBlockPos.y)
+					{	
+						// Depending on elevation make different kinds of trees
+						if(currBlockPos.y < 0.6*ChunkManager::CHUNKHEIGHT)
+							treeGen.makeTree(chunkBlocks[index].getPosition(),noise);
+						else
+							treeGen.makeChristmasTree(chunkBlocks[index].getPosition(),noise);
+					}
+			}
 
 		}
 	}
@@ -130,12 +156,47 @@ glm::vec3 TerrainBuilder::getHeightmapPosition(glm::vec3 xzPosition)
 	return xzPosition;
 }
 
+bool TerrainBuilder::isPrime(int n)
+{
+	if (n <= 1)
+		return false;
+	else if (n <= 3)
+		return true;
+	else if (n % 2 == 0 || n % 3 == 0)
+		return false;
+	int i = 5;
+	while(i*i <= n)
+	{
+		if (n % i == 0 || n % (i + 2) == 0)
+			return false;
+		i += 6;
+	}
+	return true;
+}
+
+/**
+ *  Fills an integer array where each index points to the closest prime larger than the index (up to prime 97)
+ */
+void TerrainBuilder::fillClosestPrimes(int* closestPrimes)
+{
+
+	int size = 101;
+	closestPrimes[size -1] = 97;
+
+	for(int i = size -2; i >= 0; i--)
+	{
+		if (isPrime(i))
+			closestPrimes[i] = i;
+		else
+			closestPrimes[i] = closestPrimes[i+1];
+	}
+}
+
 BlockType TerrainBuilder::getBlockType(const float elevation)
 {
 	int maxHeight = ChunkManager::CHUNKHEIGHT;
 	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
 	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;
-	else if (elevation < 0.55f * maxHeight) return BlockType::GRASS;
-	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS; // Can later be changed to like mountain-type blocks
+	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS;
 	else  return BlockType::SNOW;
 }

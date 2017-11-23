@@ -28,5 +28,6 @@ struct Transform {
 	void scale(float32 s);
 
 	glm::mat4 getModelMatrix() const;
+	glm::vec3 getPosition() const { return glm::vec3(xPos, yPos, zPos); }
 };
 
