@@ -34,8 +34,8 @@ vec4 FogCalculation(vec4 tempColor, float dist, vec3 viewDir)
 {
 	const float density = 0.008;
 	float fogAmount = (1.0 - exp( -dist*density))*(1.0 - exp( -dist*density));
-	float sunAmount = max( dot( viewDir,- normalize(lightPos - viewPos) ), 0.0 );
-    vec3  fogColor  = mix( vec3(0.5,0.6,0.7),lightColor, pow(sunAmount,8.0) ); // Scatter sunlight color near sun pos
+	float sunAmount = max( dot( viewDir,-lightDirection ), 0.0 );
+    vec3  fogColor  = mix( vec3(0.588235,0.74118,0.99608),lightColor, pow(sunAmount,8.0) ); // Scatter sunlight color near sun pos
 	return mix( tempColor, vec4(fogColor,1.0), fogAmount );
 }
 
