@@ -113,6 +113,27 @@ int main() {
 					gFullscreen = true;
 				}
 			}
+
+			if (key == GLFW_KEY_F3 && action == GLFW_PRESS)
+			{
+				FREE_CAM_ON = !FREE_CAM_ON;
+				if (FREE_CAM_ON)
+					std::cout << "Switched to Controlling FreeCam" << std::endl;
+				else
+					std::cout << "Switched to Controlling Player" << std::endl;
+			}
+
+			if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
+			{
+				PLAYER_COLLISION_AABB = !PLAYER_COLLISION_AABB;
+
+				gPlayer->setCollisionMode(PLAYER_COLLISION_AABB ? CollisionMode::AABB : CollisionMode::Sphere);
+
+				if (PLAYER_COLLISION_AABB)
+					std::cout << "Switched to Player Collision AABB testing" << std::endl;
+				else
+					std::cout << "Switched to Player Collision Sphere testing" << std::endl;
+			}
 		});
 
 		// Close application when esc is pressed
@@ -161,28 +182,6 @@ int main() {
 	// Player
 	gPlayer = new Player(&RenderingContext::get()->camera);
 	gPlayer->transform.translateLocal(0, 160, 2);
-
-	InputManager::instance()->registerKeyCallback([](int32 key, int32 action) {
-			if (key == GLFW_KEY_F3 && action == GLFW_PRESS)
-			{
-				FREE_CAM_ON = !FREE_CAM_ON;
-				if (FREE_CAM_ON)
-					std::cout << "Switched to Controlling FreeCam" << std::endl;
-				else
-					std::cout << "Switched to Controlling Player" << std::endl;
-			}
-			if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
-			{
-				PLAYER_COLLISION_AABB = !PLAYER_COLLISION_AABB;
-
-				gPlayer->setCollisionMode(PLAYER_COLLISION_AABB ? CollisionMode::AABB : CollisionMode::Sphere);
-
-				if(PLAYER_COLLISION_AABB)
-					std::cout << "Switched to Player Collision AABB testing" << std::endl;
-				else
-					std::cout << "Switched to Player Collision Sphere testing" << std::endl;
-			}
-		});
 
 	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);

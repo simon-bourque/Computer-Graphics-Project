@@ -181,7 +181,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AABB.h" />
+    <ClInclude Include="AABBCollider.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Entity.h" />

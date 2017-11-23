@@ -2,7 +2,7 @@
 
 #include "Player.h"
 #include "ChunkManager.h"
-#include "AABB.h"
+#include "AABBCollider.h"
 #include "SphereCollider.h"
 #include "InputManager.h"
 
@@ -151,25 +151,29 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 	glm::vec3 upOne = glm::vec3(newPosition.x, currentY + 1.0f, newPosition.z);
 	if (m_collisionMode == CollisionMode::AABB)
 	{
-		/*
-		AABB me = AABB::centeredOnPoint(newPosition, 1.0f);
-		AABB me2 = AABB::centeredOnPoint(noY, 1.0f);
-		
+		AABBCollider me = AABBCollider::centeredOnPoint(newPosition, 1.0f);
+		AABBCollider me2 = AABBCollider::centeredOnPoint(noY, 1.0f);
+		AABBCollider me3 = AABBCollider::centeredOnPoint(upOne, 1.0f);
+
 		if (m_chunkPositions.size() > 0)
 		{
 			for (auto& it : m_chunkPositions)
 			{
-				AABB other = AABB(it, 1.0f);
-				if (AABB::checkCollision(me, other))
+				AABBCollider other = AABBCollider(it, 1.0f);
+				if (AABBCollider::checkCollision(me, other))
 				{
-					if (AABB::checkCollision(me2, other))
-						return Collision::Colliding;
+					if (AABBCollider::checkCollision(me2, other))
+					{
+						if (AABBCollider::checkCollision(me3, other))
+							return Collision::Colliding;
+						else
+							return Collision::NoCollisionUpOne;
+					}
 					else
 						return Collision::CollidingNotY;
 				}
 			}
 		}
-		*/
 	}
 	else
 	{
@@ -189,7 +193,6 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 							return Collision::Colliding;
 						else
 							return Collision::NoCollisionUpOne;
-						
 					}
 					else
 						return Collision::CollidingNotY;
