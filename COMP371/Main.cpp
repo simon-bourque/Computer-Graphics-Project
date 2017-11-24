@@ -150,12 +150,12 @@ int main() {
 
 		// Load skybox texture
 		CubeMapPaths paths;
-		paths.bk = "craterlake_bk.tga";
-		paths.ft = "craterlake_ft.tga";
-		paths.up = "craterlake_up.tga";
-		paths.dn = "craterlake_dn.tga";
-		paths.lf = "craterlake_lf.tga";
-		paths.rt = "craterlake_rt.tga";
+		paths.bk = "MCLITEbk.tga";
+		paths.ft = "MCLITEft.tga";
+		paths.up = "MCLITEup.tga";
+		paths.dn = "MCLITEdn.tga";
+		paths.lf = "MCLITElf.tga";
+		paths.rt = "MCLITErt.tga";
 		skyboxShader = RenderingContext::get()->shaderCache.loadShaderProgram("skybox_shader", "skybox_vert.glsl", "skybox_frag.glsl");
 		skyboxTexture = RenderingContext::get()->textureCache.loadTextureCubeMap("skybox_texture", paths);
 
