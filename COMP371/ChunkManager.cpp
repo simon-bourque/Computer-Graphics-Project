@@ -209,17 +209,20 @@ glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
 }
 
 
-Chunk ChunkManager::getChunkHandle(glm::vec3 currentChunk)
+bool ChunkManager::getChunkHandle(glm::vec3 currentChunk, Chunk& chunky)
 {
 	int64 chunkPosition = encodePosition(currentChunk.x, currentChunk.z);
-	
-	Chunk chunky;
-	if (cmLoadedChunks.size() > 10)//need to figure out loading issue..
+
+	auto search = cmLoadedChunks.find(chunkPosition);
+	if (search != cmLoadedChunks.end())
 	{
 		chunky = cmLoadedChunks.at(chunkPosition);
+		return true;
 	}
-
-	return chunky;
+	else
+	{
+		return false;
+	}
 }
 
 ChunkManager::~ChunkManager()

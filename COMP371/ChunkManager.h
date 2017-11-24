@@ -28,7 +28,7 @@ public:
 	static ChunkManager* instance();
 	HANDLE getSemaphoreHandle() const { return cmSemaphore; }
 	glm::vec3 getCurrentChunk(glm::vec3 playerPosition) const;
-	Chunk getChunkHandle(glm::vec3 currentChunk);
+	bool getChunkHandle(glm::vec3 currentChunk, Chunk& chunky);
 
 	//Data Manipulation
 	void loadChunks(glm::vec3 playerPosition);

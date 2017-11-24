@@ -84,7 +84,7 @@ void Player::update(float32 deltaSeconds)
 	checkChunk();
 
 	glm::vec3 newPosition = glm::vec3(transform.xPos + deltaPos.x, transform.yPos + deltaPos.y, transform.zPos + deltaPos.z);
-	
+
 	Collision coll = checkForSurroundingBlocks(newPosition, transform.yPos);
 
 	switch (coll)
@@ -138,10 +138,19 @@ void Player::checkChunk()
 
 	if (currentChunkPosition != m_chunkPosition)
 	{
-		Chunk c = ChunkManager::instance()->getChunkHandle(currentChunkPosition);
-		m_chunkPosition = currentChunkPosition;
-		m_chunkPositions = c.getBlockPositions();
-		//std::cout << "currentChunk at (" << currentChunkPosition.x << "," << currentChunkPosition.y << "," << currentChunkPosition.z << ")" << std::endl;
+		Chunk c;
+		bool gotChunk = ChunkManager::instance()->getChunkHandle(currentChunkPosition, c);
+
+		if (gotChunk)
+		{
+			m_chunkPosition = currentChunkPosition;
+			m_chunkPositions = c.getBlockPositions();
+
+			// If gravity was not enabled, well then enable it
+			if(!m_ready)
+				m_ready = true;
+			//std::cout << "currentChunk at (" << currentChunkPosition.x << "," << currentChunkPosition.y << "," << currentChunkPosition.z << ")" << std::endl;
+		}
 	}
 }
 
@@ -244,11 +253,6 @@ void Player::onKey(int32 key, int32 action)
 		}
 		else if (action == GLFW_RELEASE) {
 			m_jumpPressed = false;
-		}
-	}
-	if (key == GLFW_KEY_ENTER) {
-		if (action == GLFW_PRESS) {
-			m_ready = true;
 		}
 	}
 }
