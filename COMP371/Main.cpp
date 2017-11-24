@@ -134,6 +134,13 @@ int main() {
 				else
 					std::cout << "Switched to Player Collision Sphere testing" << std::endl;
 			}
+
+			if (key == GLFW_KEY_HOME && action == GLFW_PRESS)
+			{
+				gPlayer->transform.xPos = playerPosition.x;
+				gPlayer->transform.yPos = playerPosition.y;
+				gPlayer->transform.zPos = playerPosition.z;
+			}
 		});
 
 		// Close application when esc is pressed
@@ -181,7 +188,7 @@ int main() {
 
 	// Player
 	gPlayer = new Player(&RenderingContext::get()->camera);
-	gPlayer->transform.translateLocal(0, 160, 2);
+	gPlayer->transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 
 	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
