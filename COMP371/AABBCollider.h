@@ -24,13 +24,13 @@ struct AABBCollider {
 		, pointMax(pointMax)
 	{}
 
-	AABBCollider(const glm::vec3& bottomCorner, const int& l)
+	AABBCollider(const glm::vec3& bottomCorner, const float& l)
 	{
 		pointMin = glm::vec3(bottomCorner.x, bottomCorner.y, bottomCorner.z + l);
 		pointMax = glm::vec3(bottomCorner.x + l, bottomCorner.y + l, bottomCorner.z);
 	}
 
-	static AABBCollider centeredOnPoint(const glm::vec3& center, const int& l)
+	static AABBCollider centeredOnPoint(const glm::vec3& center, const float& l)
 	{
 		int r = l / 2;
 		glm::vec3 pMin = glm::vec3(center.x - r, center.y, center.z + r);
