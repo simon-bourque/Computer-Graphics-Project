@@ -70,7 +70,7 @@ GLFWwindow* gWindow = nullptr;
 bool FREE_CAM_ON = false;
 glm::vec3 camPositionVector;
 FreeCameraController* gCameraController;
-bool PLAYER_COLLISION_AABB = false;
+bool PLAYER_COLLISION_AABB = true;
 Player* gPlayer;
 
 bool gFullscreen = false;

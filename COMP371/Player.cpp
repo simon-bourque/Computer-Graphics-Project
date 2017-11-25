@@ -20,7 +20,7 @@ Player::Player(Camera* camera)
 	, m_isJumping(false)
 	, m_ready(false)
 	, m_jumpedFrames(0)
-	, m_collisionMode(CollisionMode::Sphere)
+	, m_collisionMode(CollisionMode::AABB)
 {
 	InputManager::instance()->registerKeyCallback(std::bind(&Player::onKey, this, std::placeholders::_1, std::placeholders::_2));
 	InputManager::instance()->registerMouseBtnCallback(std::bind(&Player::onMouseButton, this, std::placeholders::_1, std::placeholders::_2));
@@ -157,15 +157,15 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 	glm::vec3 upOne = glm::vec3(newPosition.x, currentY + 1.0f, newPosition.z);
 	if (m_collisionMode == CollisionMode::AABB)
 	{
-		AABBCollider me = AABBCollider::centeredOnPoint(newPosition, 1.0f);
-		AABBCollider me2 = AABBCollider::centeredOnPoint(noY, 1.0f);
-		AABBCollider me3 = AABBCollider::centeredOnPoint(upOne, 1.0f);
+		AABBCollider me = AABBCollider::centeredOnPoint(newPosition, 1.2f);
+		AABBCollider me2 = AABBCollider::centeredOnPoint(noY, 1.2f);
+		AABBCollider me3 = AABBCollider::centeredOnPoint(upOne, 1.2f);
 
 		if (m_chunkPositions.size() > 0)
 		{
 			for (auto& it : m_chunkPositions)
 			{
-				AABBCollider other = AABBCollider::centeredOnPoint(it, 1.0f);
+				AABBCollider other = AABBCollider::centeredOnPoint(it, 1.2f);
 				if (AABBCollider::checkCollision(me, other))
 				{
 					if (AABBCollider::checkCollision(me2, other))
