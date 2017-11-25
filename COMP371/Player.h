@@ -12,12 +12,12 @@ public:
 	Player(Camera* camera);
 	virtual ~Player();
 
-	glm::vec3 getPosition() { return m_position; };
-
 	void update(float32 deltaSeconds);
 
+	void setWaterHeight(const float& height) { m_swimY = height; };
 	void setCollisionMode(const CollisionMode& mode) { m_collisionMode = mode; };
 
+	glm::vec3 getPosition() { return m_position; };
 	glm::vec3 getCurrentChunkPosition() const { return m_chunkPosition; };
 
 private:
@@ -38,6 +38,8 @@ private:
 	bool m_ready;
 	bool m_isJumping;
 	int m_jumpedFrames;
+
+	float m_swimY;
 
 	CollisionMode m_collisionMode;
 

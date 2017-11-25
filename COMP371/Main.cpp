@@ -199,6 +199,7 @@ int main() {
 	// Player
 	gPlayer = new Player(&RenderingContext::get()->camera);
 	gPlayer->transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
+	gPlayer->setWaterHeight(WaterRenderer::get()->getY());
 
 	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);

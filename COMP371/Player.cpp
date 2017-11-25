@@ -78,7 +78,12 @@ void Player::update(float32 deltaSeconds)
 
 	glm::vec3 deltaPos(dx, dy, dz);
 	deltaPos = (glm::normalize(deltaPos) * SPEED * deltaSeconds);
-	deltaPos = glm::clamp(deltaPos, -0.9f, 0.9f);
+
+	// if you are in the water (below it), move half as much per frame
+	if (m_position.y < m_swimY)
+		deltaPos = glm::clamp(deltaPos, -0.45f, 0.45f);
+	else
+		deltaPos = glm::clamp(deltaPos, -0.9f, 0.9f);
 
 	//Check if the chunk you are in has changed
 	checkChunk();
