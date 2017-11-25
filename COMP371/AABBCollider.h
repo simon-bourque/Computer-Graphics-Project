@@ -32,9 +32,9 @@ struct AABBCollider {
 
 	static AABBCollider centeredOnPoint(const glm::vec3& center, const float& l)
 	{
-		int r = l / 2;
-		glm::vec3 pMin = glm::vec3(center.x - r, center.y, center.z + r);
-		glm::vec3 pMax = glm::vec3(center.x + r, center.y + r, center.z);
+		float r = l / 2;
+		glm::vec3 pMin = glm::vec3(center.x - r, center.y - r, center.z - r);
+		glm::vec3 pMax = glm::vec3(center.x + r, center.y + r, center.z + r);
 
 		return AABBCollider(pMin, pMax);
 	}
@@ -43,7 +43,7 @@ struct AABBCollider {
 	{
 		bool insideX = box1.pointMax.x >= box2.pointMin.x && box1.pointMin.x <= box2.pointMax.x;
 		bool insideY = box1.pointMax.y >= box2.pointMin.y && box1.pointMin.y <= box2.pointMax.y;
-		bool insideZ = box1.pointMax.z <= box2.pointMin.z && box1.pointMin.z >= box2.pointMax.z;
+		bool insideZ = box1.pointMax.z >= box2.pointMin.z && box1.pointMin.z <= box2.pointMax.z;
 
 		return insideX && insideY && insideZ;
 	}

@@ -165,7 +165,7 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 		{
 			for (auto& it : m_chunkPositions)
 			{
-				AABBCollider other = AABBCollider(it, 1.0f);
+				AABBCollider other = AABBCollider::centeredOnPoint(it, 1.0f);
 				if (AABBCollider::checkCollision(me, other))
 				{
 					if (AABBCollider::checkCollision(me2, other))
@@ -190,7 +190,7 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 		{
 			for (auto& it : m_chunkPositions)
 			{
-				SphereCollider other = SphereCollider::centeredOnVoxel(it);
+				SphereCollider other = SphereCollider(it, 1.0f);//SphereCollider::centeredOnVoxel(it);
 				if (SphereCollider::checkCollision(meAll, other))
 				{
 					if (SphereCollider::checkCollision(meNoY, other))
