@@ -18,6 +18,8 @@ public:
 
 	void setCollisionMode(const CollisionMode& mode) { m_collisionMode = mode; };
 
+	glm::vec3 getCurrentChunkPosition() const { return m_chunkPosition; };
+
 private:
 	void checkChunk();
 	Collision checkForSurroundingBlocks(const glm::vec3& newPosition, const float32& currentY);

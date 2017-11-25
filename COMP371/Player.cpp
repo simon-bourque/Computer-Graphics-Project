@@ -110,7 +110,7 @@ void Player::update(float32 deltaSeconds)
 	}
 
 	m_camera->transform.xPos = transform.xPos;
-	m_camera->transform.yPos = transform.yPos + 2.0f;
+	m_camera->transform.yPos = transform.yPos + 1.0f;
 	m_camera->transform.zPos = transform.zPos;
 
 	glm::vec2 mouseAxis = getMouseAxis() * ROTATE_SPEED;
@@ -128,8 +128,6 @@ void Player::update(float32 deltaSeconds)
 		m_camera->transform.rotateLocal(mouseAxis.y, 0, 0);
 		m_camera->transform.rotate(0, -mouseAxis.x, 0);
 	}
-
-	//std::cout << "Player at (" << m_position.x << "," << m_position.y << "," << m_position.z << ")" << std::endl;
 }
 
 void Player::checkChunk()
@@ -149,7 +147,6 @@ void Player::checkChunk()
 			// If gravity was not enabled, well then enable it
 			if(!m_ready)
 				m_ready = true;
-			//std::cout << "currentChunk at (" << currentChunkPosition.x << "," << currentChunkPosition.y << "," << currentChunkPosition.z << ")" << std::endl;
 		}
 	}
 }

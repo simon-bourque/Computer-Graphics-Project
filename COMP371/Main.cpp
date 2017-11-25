@@ -141,6 +141,12 @@ int main() {
 				gPlayer->transform.yPos = playerPosition.y;
 				gPlayer->transform.zPos = playerPosition.z;
 			}
+
+			if (key == GLFW_KEY_C && action == GLFW_PRESS)
+			{
+				std::cout << "Player at (" << gPlayer->transform.xPos << "," << gPlayer->transform.yPos << "," << gPlayer->transform.zPos << ")" << std::endl;
+				std::cout << "currentChunk at (" << gPlayer->getCurrentChunkPosition().x << "," << gPlayer->getCurrentChunkPosition().y << "," << gPlayer->getCurrentChunkPosition().z << ")" << std::endl;
+			}
 		});
 
 		// Close application when esc is pressed
