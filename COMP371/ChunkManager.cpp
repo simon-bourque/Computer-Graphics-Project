@@ -8,6 +8,8 @@
 
 #include "Profiling.h"
 
+//#define SEPERATE_FOLIAGE_VOXELS	// Comment me to filter out foliage voxels
+
 constexpr int64 encodePosition(int32 x, int32 z)
 {
 	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
@@ -250,6 +252,11 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	std::vector<glm::vec3> cloud;
 	cloud.reserve(chunkData.size());
 
+#ifdef SEPERATE_FOLIAGE_VOXELS
+	std::vector<glm::vec3> fcloud;
+	fcloud.reserve(500);	// not scientific
+#endif
+
 	cube::fill(vertices, uvCoords, normals, indices);
 
 	GLuint vbo;
@@ -301,7 +308,16 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 		int x = pos.x;
 		int y = pos.y;
 		int z = pos.z;
+
+#ifdef SEPERATE_FOLIAGE_VOXELS
+		BlockType t = chunkData[i].getBlockType();
+		if (t == BlockType::LEAVES || t == BlockType::LOG)
+			fcloud.push_back(pos);
+		else
+			cloud.push_back(pos);
+#else
 		cloud.push_back(pos);
+#endif
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
@@ -330,6 +346,9 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
 	chunky.setBlockPositions(cloud);
+#ifdef SEPERATE_FOLIAGE_VOXELS
+	chunky.setFoliageBlockPositions(fcloud);
+#endif
 	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
 	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
 }
