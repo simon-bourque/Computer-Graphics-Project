@@ -120,7 +120,11 @@ int main() {
 				if (FREE_CAM_ON)
 					std::cout << "Switched to Controlling FreeCam" << std::endl;
 				else
+				{
 					std::cout << "Switched to Controlling Player" << std::endl;
+					RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
+					gPlayer->transform.orient(glm::degrees(-0.0f), 0, 0);
+				}
 			}
 
 			if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
