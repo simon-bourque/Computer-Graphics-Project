@@ -25,6 +25,7 @@ void Camera::setPerspective(float32 fov, float32 aspectRatio, float32 nearPlane,
 	m_projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 	m_near = nearPlane;
 	m_far = farPlane;
+	m_aspectRatio = aspectRatio;
 
 	// Setup frustum planes
 	//float32 nearHalfHeight = nearPlane * tan(fov / 2.0f);
@@ -58,6 +59,41 @@ void Camera::setPerspective(float32 fov, float32 aspectRatio, float32 nearPlane,
 	m_frustum[3] = glm::vec4(rightNormal, 0.0f);
 	m_frustum[4] = glm::vec4(glm::vec3(0, 0, 1), nearPlane);
 	m_frustum[5] = glm::vec4(glm::vec3(0, 0, -1), -farPlane);
+}
+
+std::vector<glm::vec4> Camera::getFrustumCorners(float32 fov, float32 aspectRatio) const
+{
+	// Setup frustum planes
+	float32 nearHalfHeight = m_near * glm::tan(glm::radians(fov*aspectRatio / 2.0f));
+	float32 nearHalfWidth = m_near * glm::tan(glm::radians(fov / 2.0f));
+
+
+	float farPlane = ChunkManager::LOADINGRADIUS*ChunkManager::CHUNKWIDTH;
+	float32 farHalfHeight = farPlane * glm::tan(glm::radians(fov*aspectRatio / 2.0f));
+	float32 farHalfWidth = farPlane * glm::tan(glm::radians(fov / 2.0f));
+
+	glm::vec3 nearTopRight(nearHalfWidth, nearHalfHeight, m_near);
+	glm::vec3 nearTopLeft(-nearHalfWidth, nearHalfHeight, m_near);
+	glm::vec3 nearBottomRight(nearHalfWidth, -nearHalfHeight, m_near);
+	glm::vec3 nearBottomLeft(-nearHalfWidth, -nearHalfHeight, m_near);
+
+	glm::vec3 farTopRight(farHalfWidth, farHalfHeight, farPlane);
+	glm::vec3 farTopLeft(-farHalfWidth, farHalfHeight, farPlane);
+	glm::vec3 farBottomRight(farHalfWidth, -farHalfHeight, farPlane);
+	glm::vec3 farBottomLeft(-farHalfWidth, -farHalfHeight, farPlane);
+
+	std::vector<glm::vec4>  frustumCorners;
+
+	frustumCorners.push_back(glm::vec4(nearBottomLeft, 1.0f));
+	frustumCorners.push_back(glm::vec4(nearBottomRight, 1.0f));
+	frustumCorners.push_back(glm::vec4(nearTopLeft, 1.0f));
+	frustumCorners.push_back(glm::vec4(nearTopRight, 1.0f));
+	frustumCorners.push_back(glm::vec4(farBottomLeft, 1.0f));
+	frustumCorners.push_back(glm::vec4(farBottomRight, 1.0f));
+	frustumCorners.push_back(glm::vec4(farTopLeft, 1.0f));
+	frustumCorners.push_back(glm::vec4(farTopRight, 1.0f));
+
+	return frustumCorners;
 }
 
 bool Camera::intersectsFrustum(const Chunk& chunk) {

@@ -23,24 +23,45 @@ ShadowMap::ShadowMap(uint32 width, uint32 height, glm::vec3 lightDirection)
 
 void ShadowMap::updateMVP(const glm::vec3& lightDirection)
 {
-	//The direction of the light inverted to go torwards the sky instead. Multiplied by a variable for distance.
-	glm::vec3 invLightDirection = glm::normalize(-lightDirection) * sunDirectionMult;
-	glm::vec3 playerPos = ChunkManager::instance()->getCurrentChunk(RenderingContext::get()->camera.transform.getPosition());
 
-	//Setting the x and z components of the light position to follow the player throughout the terrain. The y value is constant.
-	glm::vec3 lightPosition = { playerPos.x + invLightDirection.x, invLightDirection.y, playerPos.z + invLightDirection.z };
+	// Light-Space View matrix, light position is origin in light coord system
+	glm::mat4 lightView = glm::lookAt(glm::vec3(0, 0, 0), glm::normalize(lightDirection), glm::vec3(0, 1, 0));
 
-	//The radius we need for the orthographic matrix to include all the terrain based on the current chunk loading radius.
-	float32 loadingRadius = (ChunkManager::LOADINGRADIUS + 0.5) * ChunkManager::CHUNKWIDTH;
+	// Get 8 corners camera view bounding frustum
+	vector<glm::vec4> frustumCorners = RenderingContext::get()->camera.getFrustumCorners(45.0f, RenderingContext::get()->camera.getAspectRatio());
+
+	// Get Camera View Matrix and Inverse
+	glm::mat4 camView = RenderingContext::get()->camera.getViewMatrix();
+	glm::mat4 camViewInverse = glm::inverse(camView);
+
+	float minX = FLT_MAX;
+	float maxX = -FLT_MAX;
+	float minY = FLT_MAX;
+	float maxY = -FLT_MAX;
+	float minZ = FLT_MAX;
+	float maxZ = -FLT_MAX;
+
+	// Get the min/max values for the frustum's bounding box
+	for (glm::vec4& corner : frustumCorners)
+	{
+		// Transform the frustum coordinate from view to world space
+		// Then, transform the frustum coordinate from world to light space
+		glm::vec4 worldSpace = camViewInverse * corner;
+		corner = lightView * worldSpace;
+
+		minX = min(minX, corner.x);
+		maxX = max(maxX, corner.x);
+		minY = min(minY, corner.y);
+		maxY = max(maxY, corner.y);
+		minZ = min(minZ, corner.z);
+		maxZ = max(maxZ, corner.z);
+	}
 
 	//Orthographic projection matrix from the point of view of the sun. The +50 value is just to be safe and include a little bit more of the terrain than needed.
-	glm::mat4 proj = glm::ortho<float>(-loadingRadius, loadingRadius, 0, ChunkManager::CHUNKHEIGHT, 0.1f , 500.0f);
-
-	//Lookat matrix from the light position to look at the x and z component of the player but at 0 in the y axis.
-	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(playerPos.x, 0, playerPos.z), glm::vec3(0, 1, 0));
+	glm::mat4 proj = glm::ortho<float>(minX, maxX, minY, maxY, minZ, maxZ);
 	glm::mat4 mod = glm::mat4(1.0f);
 	
-	m_lightSpaceMVP = proj * view * mod;
+	m_lightSpaceMVP = proj * lightView * mod;
 
 	m_shadowShader->use();
 	m_shadowShader->setUniform("lightSpaceMatrix", m_lightSpaceMVP);
@@ -61,10 +82,10 @@ void ShadowMap::buildFBO()
 	int32 mapSize = max(m_width, m_height);
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mapSize, mapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
