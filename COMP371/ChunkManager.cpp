@@ -8,7 +8,7 @@
 
 #include "Profiling.h"
 
-#define SEPERATE_FOLIAGE_VOXELS	// Comment me to filter out foliage voxels
+//#define SEPERATE_FOLIAGE_VOXELS	// Comment me to filter out foliage voxels
 
 constexpr int64 encodePosition(int32 x, int32 z)
 {

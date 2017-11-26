@@ -90,6 +90,31 @@ void Player::update(float32 deltaSeconds)
 
 	glm::vec3 newPosition = glm::vec3(transform.xPos + deltaPos.x, transform.yPos + deltaPos.y, transform.zPos + deltaPos.z);
 
+	Collision coll = checkForSurroundingBlocks(newPosition);
+
+	switch (coll)
+	{
+	case(Collision::Colliding):
+		std::cout << "Colliding" << std::endl;
+		hasLanded = true;
+		break;
+	case(Collision::NoCollision):
+		if (dx != 0 || dy != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
+		break;
+	case(Collision::CollidingNotY):
+		if (dx != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
+		hasLanded = true;
+		break;
+	case(Collision::NoCollisionUpOne):
+		if (dx != 0 || dz != 0)
+			transform.translateLocal(deltaPos.x, 1.0f, deltaPos.z);
+		hasLanded = true;
+		break;
+	}
+
+	/*
 	Collision coll = checkForShubbery(newPosition);
 
 	if (coll)
@@ -132,6 +157,7 @@ void Player::update(float32 deltaSeconds)
 			break;
 		}
 	}
+	*/
 
 	// update the camera's transform
 	m_camera->transform.xPos = transform.xPos;
@@ -248,12 +274,25 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition)
 				AABBCollider other = AABBCollider::centeredOnPoint(it, 1.2f);
 				if (AABBCollider::checkCollision(me, other))
 				{
+					//ok you collided... is there a block above you?
+					bool blockCrawl = false;
+					for (auto& it2 : m_chunkPositions)
+					{
+						if (it2.x == it.x && it2.z == it.z && it2.y != it.y)
+						{
+							blockCrawl = true;
+							break;// once is enough
+						}
+					}
+
 					if (AABBCollider::checkCollision(me2, other))
 					{
 						if (AABBCollider::checkCollision(me3, other))
 							return Collision::Colliding;
-						else
+						else if(!blockCrawl)
 							return Collision::NoCollisionUpOne;
+						else
+							return Collision::Colliding;
 					}
 					else
 						return Collision::CollidingNotY;
@@ -273,12 +312,25 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition)
 				SphereCollider other = SphereCollider(it, 1.0f);
 				if (SphereCollider::checkCollision(meAll, other))
 				{
+					//ok you collided... is there a block above you?
+					bool blockCrawl = false;
+					for (auto& it2 : m_chunkPositions)
+					{
+						if (it2.x == it.x && it2.z == it.z && it2.y != it.y)
+						{
+							blockCrawl = true;
+							break;// once is enough
+						}
+					}
+
 					if (SphereCollider::checkCollision(meNoY, other))
 					{
 						if (SphereCollider::checkCollision(meUpOne, other))
 							return Collision::Colliding;
-						else
+						else if (!blockCrawl)
 							return Collision::NoCollisionUpOne;
+						else
+							return Collision::Colliding;
 					}
 					else
 						return Collision::CollidingNotY;
