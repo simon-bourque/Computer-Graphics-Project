@@ -22,7 +22,9 @@ public:
 
 private:
 	void checkChunk();
-	Collision checkForSurroundingBlocks(const glm::vec3& newPosition, const float32& currentY);
+
+	Collision checkForSurroundingBlocks(const glm::vec3& newPosition);
+	Collision checkForShubbery(const glm::vec3& newPosition);
 
 	void onKey(int32 key, int32 action);
 	void onMouseButton(int32 button, int32 action);
@@ -46,6 +48,7 @@ private:
 	glm::vec3 m_position;
 	glm::vec3 m_chunkPosition;
 	std::vector<glm::vec3> m_chunkPositions;
+	std::vector<glm::vec3> m_chunkPositionsFoliage;
 
 	Camera* m_camera;
 };

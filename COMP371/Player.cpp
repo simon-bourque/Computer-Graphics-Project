@@ -90,30 +90,50 @@ void Player::update(float32 deltaSeconds)
 
 	glm::vec3 newPosition = glm::vec3(transform.xPos + deltaPos.x, transform.yPos + deltaPos.y, transform.zPos + deltaPos.z);
 
-	Collision coll = checkForSurroundingBlocks(newPosition, transform.yPos);
+	Collision coll = checkForShubbery(newPosition);
 
-	switch (coll)
+	if (coll)
 	{
-	case(Collision::Colliding):
-		std::cout << "Colliding" << std::endl;
-		hasLanded = true;
-		break;
-	case(Collision::NoCollision):
-		if (dx != 0 || dy != 0 || dz != 0)
-			transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
-		break;
-	case(Collision::CollidingNotY):
-		if (dx != 0 || dz != 0)
-			transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
-		hasLanded = true;
-		break;
-	case(Collision::NoCollisionUpOne):
-		if (dx != 0 || dz != 0)
-			transform.translateLocal(deltaPos.x, 1.0f, deltaPos.z);
-		hasLanded = true;
-		break;
+		// congrats you hit a tree...
+		switch (coll)
+		{
+		case(Collision::Colliding):
+			hasLanded = true;
+			break;
+		case(Collision::CollidingXZ):
+			if (dy != 0)
+				transform.translateLocal(0.0f, deltaPos.y, 0.0f);
+			break;
+		}
+	}
+	else
+	{
+		coll = checkForSurroundingBlocks(newPosition);
+
+		switch (coll)
+		{
+		case(Collision::Colliding):
+			std::cout << "Colliding" << std::endl;
+			hasLanded = true;
+			break;
+		case(Collision::NoCollision):
+			if (dx != 0 || dy != 0 || dz != 0)
+				transform.translateLocal(deltaPos.x, deltaPos.y, deltaPos.z);
+			break;
+		case(Collision::CollidingNotY):
+			if (dx != 0 || dz != 0)
+				transform.translateLocal(deltaPos.x, 0.0f, deltaPos.z);
+			hasLanded = true;
+			break;
+		case(Collision::NoCollisionUpOne):
+			if (dx != 0 || dz != 0)
+				transform.translateLocal(deltaPos.x, 1.0f, deltaPos.z);
+			hasLanded = true;
+			break;
+		}
 	}
 
+	// update the camera's transform
 	m_camera->transform.xPos = transform.xPos;
 	m_camera->transform.yPos = transform.yPos + 1.0f;
 	m_camera->transform.zPos = transform.zPos;
@@ -148,6 +168,7 @@ void Player::checkChunk()
 		{
 			m_chunkPosition = currentChunkPosition;
 			m_chunkPositions = c.getBlockPositions();
+			m_chunkPositionsFoliage = c.getFoliageBlockPositions();
 
 			// If gravity was not enabled, well then enable it
 			if(!m_ready)
@@ -156,10 +177,64 @@ void Player::checkChunk()
 	}
 }
 
-Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const float32& currentY)
+Collision Player::checkForShubbery(const glm::vec3& newPosition)
 {
-	glm::vec3 noY = glm::vec3(newPosition.x, currentY, newPosition.z);
-	glm::vec3 upOne = glm::vec3(newPosition.x, currentY + 1.0f, newPosition.z);
+	glm::vec3 noXZ = glm::vec3(m_position.x, newPosition.y, m_position.y);
+
+	if (m_collisionMode == CollisionMode::AABB)
+	{
+		AABBCollider me = AABBCollider::centeredOnPoint(newPosition, 1.2f);
+		AABBCollider me2 = AABBCollider::centeredOnPoint(noXZ, 1.2f);
+
+		if (m_chunkPositionsFoliage.size() > 0)
+		{
+			for (auto& it : m_chunkPositionsFoliage)
+			{
+				AABBCollider other = AABBCollider::centeredOnPoint(it, 1.2f);
+				if (AABBCollider::checkCollision(me, other))
+				{
+					if (AABBCollider::checkCollision(me2, other))
+					{
+						std::cout << "almost hittin' them good'ol foliage-xz" << std::endl;
+						return Collision::CollidingXZ;
+					}
+					std::cout << "hittin' them good'ol foliage" << std::endl;
+					return Collision::Colliding;
+				}
+			}
+		}
+	}
+	else
+	{
+		SphereCollider meAll = SphereCollider(newPosition, 1.0f);
+		SphereCollider meNoXZ = SphereCollider(noXZ, 1.0f);
+
+		if (m_chunkPositionsFoliage.size() > 0)
+		{
+			for (auto& it : m_chunkPositionsFoliage)
+			{
+				SphereCollider other = SphereCollider(it, 1.0f);
+				if (SphereCollider::checkCollision(meAll, other))
+				{
+					if (SphereCollider::checkCollision(meNoXZ, other))
+					{
+						std::cout << "almost hittin' them good'ol foliage-xz" << std::endl;
+						return Collision::CollidingXZ;
+					}
+					std::cout << "hittin' them good'ol foliage" << std::endl;
+					return Collision::Colliding;
+				}
+			}
+		}
+	}
+
+	return Collision::NoCollision;
+}
+
+Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition)
+{
+	glm::vec3 noY = glm::vec3(newPosition.x, m_position.y, newPosition.z);
+	glm::vec3 upOne = glm::vec3(newPosition.x, m_position.y + 1.0f, newPosition.z);
 	if (m_collisionMode == CollisionMode::AABB)
 	{
 		AABBCollider me = AABBCollider::centeredOnPoint(newPosition, 1.2f);
@@ -195,7 +270,7 @@ Collision Player::checkForSurroundingBlocks(const glm::vec3& newPosition, const 
 		{
 			for (auto& it : m_chunkPositions)
 			{
-				SphereCollider other = SphereCollider(it, 1.0f);//SphereCollider::centeredOnVoxel(it);
+				SphereCollider other = SphereCollider(it, 1.0f);
 				if (SphereCollider::checkCollision(meAll, other))
 				{
 					if (SphereCollider::checkCollision(meNoY, other))
