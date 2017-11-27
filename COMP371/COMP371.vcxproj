@@ -187,6 +187,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FreeCameraController.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Manifold.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
     <ClInclude Include="Player.h" />

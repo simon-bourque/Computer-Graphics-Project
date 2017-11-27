@@ -82,7 +82,7 @@ ShaderProgram* chunkNormalsShader = nullptr;
 #endif
 
 #define RENDER_WATER	// Comment me if you don't want to render water
-#define RENDER_SHADOWS	// Comment me if you don't want to render shadows
+//#define RENDER_SHADOWS	// Comment me if you don't want to render shadows
 
 int main() {
 

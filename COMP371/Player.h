@@ -5,9 +5,12 @@
 #include "Camera.h"
 #include "Entity.h"
 #include "Collision.h"
+#include "Manifold.h"
+#include "AABBCollider.h"
 
-class Player : public Entity
-{
+struct Chunk;
+
+class Player : public Entity {
 public:
 	Player(Camera* camera);
 	virtual ~Player();
@@ -17,10 +20,25 @@ public:
 	void setWaterHeight(const float& height) { m_swimY = height; };
 	void setCollisionMode(const CollisionMode& mode) { m_collisionMode = mode; };
 
-	glm::vec3 getPosition() { return m_position; };
+	glm::vec3 getPosition() { return m_currentPosition; };
 	glm::vec3 getCurrentChunkPosition() const { return m_chunkPosition; };
 
 private:
+	void processCollision();
+	bool checkChunkIntersection(Manifold& manifold);
+	void resolveChunkIntersection(const Manifold& manifold, const AABBCollider& blockCollider);
+
+	Chunk m_currentChunk;
+	glm::vec3 m_lastPosition;
+	glm::vec3 m_currentPosition;
+	bool m_chunkValid;
+
+	float32 m_velocityY;
+
+	bool m_glueToGround;
+	bool m_movedDuringFrame;
+	// ---------------------------
+
 	void checkChunk();
 
 	Collision checkForSurroundingBlocks(const glm::vec3& newPosition);
@@ -45,7 +63,6 @@ private:
 
 	CollisionMode m_collisionMode;
 
-	glm::vec3 m_position;
 	glm::vec3 m_chunkPosition;
 	std::vector<glm::vec3> m_chunkPositions;
 	std::vector<glm::vec3> m_chunkPositionsFoliage;

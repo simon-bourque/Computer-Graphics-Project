@@ -189,6 +189,9 @@
     <ClInclude Include="AABBCollider.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Manifold.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test_cube_vert.glsl">
