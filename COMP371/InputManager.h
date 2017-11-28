@@ -13,7 +13,6 @@ class InputManager {
 public:
 	static InputManager* instance();
 
-	void registerDebugKey(int key, void(*function)());
 	void registerKeyCallback(std::function<void(int, int)> function);
 	void registerMouseBtnCallback(std::function<void(int, int)> function);
 
@@ -39,7 +38,6 @@ private:
 	GLFWwindow* m_window;
 	glm::vec2 m_mouse_position;
 
-	std::vector <std::tuple<int, void(*)>> m_debug_keys;
 	std::vector<std::function<void(int,int)>> m_key_callbacks;
 	std::vector<std::function<void(int, int)>> m_mouse_btn_callbacks;
 
