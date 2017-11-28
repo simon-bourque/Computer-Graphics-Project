@@ -29,7 +29,11 @@
 
 #include <vector>
 
+#include "InputManager.h"
+
 #include "FreeCameraController.h"
+#include "Player.h"
+#include "Collision.h"
 
 #include "WaterRenderer.h"
 
@@ -62,7 +66,12 @@ Model* skyboxModel = nullptr;
 Texture* skyboxTexture = nullptr;
 
 GLFWwindow* gWindow = nullptr;
+
+bool FREE_CAM_ON = false;
+glm::vec3 camPositionVector;
 FreeCameraController* gCameraController;
+bool PLAYER_COLLISION_AABB = true;
+Player* gPlayer;
 
 bool gFullscreen = false;
 
@@ -73,7 +82,7 @@ ShaderProgram* chunkNormalsShader = nullptr;
 #endif
 
 #define RENDER_WATER	// Comment me if you don't want to render water
-#define RENDER_SHADOWS	// Comment me if you don't want to render shadows
+//#define RENDER_SHADOWS	// Comment me if you don't want to render shadows
 
 int main() {
 
@@ -103,6 +112,44 @@ int main() {
 					glfwSetWindowMonitor(gWindow, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
 					gFullscreen = true;
 				}
+			}
+
+			if (key == GLFW_KEY_F3 && action == GLFW_PRESS)
+			{
+				FREE_CAM_ON = !FREE_CAM_ON;
+				if (FREE_CAM_ON)
+					std::cout << "Switched to Controlling FreeCam" << std::endl;
+				else
+				{
+					std::cout << "Switched to Controlling Player" << std::endl;
+					RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
+					gPlayer->transform.orient(glm::degrees(-0.0f), 0, 0);
+				}
+			}
+
+			if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
+			{
+				PLAYER_COLLISION_AABB = !PLAYER_COLLISION_AABB;
+
+				gPlayer->setCollisionMode(PLAYER_COLLISION_AABB ? CollisionMode::AABB : CollisionMode::Sphere);
+
+				if (PLAYER_COLLISION_AABB)
+					std::cout << "Switched to Player Collision AABB testing" << std::endl;
+				else
+					std::cout << "Switched to Player Collision Sphere testing" << std::endl;
+			}
+
+			if (key == GLFW_KEY_HOME && action == GLFW_PRESS)
+			{
+				gPlayer->transform.xPos = playerPosition.x;
+				gPlayer->transform.yPos = playerPosition.y;
+				gPlayer->transform.zPos = playerPosition.z;
+			}
+
+			if (key == GLFW_KEY_C && action == GLFW_PRESS)
+			{
+				std::cout << "Player at (" << gPlayer->transform.xPos << "," << gPlayer->transform.yPos << "," << gPlayer->transform.zPos << ")" << std::endl;
+				std::cout << "currentChunk at (" << gPlayer->getCurrentChunkPosition().x << "," << gPlayer->getCurrentChunkPosition().y << "," << gPlayer->getCurrentChunkPosition().z << ")" << std::endl;
 			}
 		});
 
@@ -146,7 +193,13 @@ int main() {
 		return 1;
 	}
 
+	// FreeCam
 	gCameraController = new FreeCameraController(&RenderingContext::get()->camera);
+
+	// Player
+	gPlayer = new Player(&RenderingContext::get()->camera);
+	gPlayer->transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
+	gPlayer->setWaterHeight(WaterRenderer::get()->getY());
 
 	RenderingContext::get()->camera.transform.translateLocal(playerPosition.x, playerPosition.y, playerPosition.z);
 	RenderingContext::get()->camera.transform.orient(glm::degrees(-0.0f), 0, 0);
@@ -168,6 +221,8 @@ int main() {
 	shadowMap = new ShadowMap(SCREENWIDTH, SCREENHEIGHT, lightDirection);
 
 	WaterRenderer::get()->setLightUniforms(*sun);
+
+	initTestCube();
 
 	// Start loop
 	uint32 frames = 0;
@@ -203,14 +258,14 @@ int main() {
 	}
 
 	delete gCameraController;
+	delete gPlayer;
 	delete shadowMap;
 	delete sun;
 
 	WaterRenderer::destroy();
 	RenderingContext::destroy();
-	
-	glfwTerminate();
 
+	glfwTerminate();
 
 	return 0;
 }
@@ -245,7 +300,6 @@ GLFWwindow* initGLFW() {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) -> void {
 		
 		// Width and height are 0 when we alt-tab while in fullscreen, I have no idea why it's done that way.
@@ -268,11 +322,12 @@ void update(float32 deltaSeconds) {
 	INSTRUMENT_FUNCTION("Update", Profiler::Color::Orchid);
 
 	// Update logic...
-	gCameraController->update(deltaSeconds);
+	if(FREE_CAM_ON)
+		gCameraController->update(deltaSeconds);
+	else
+		gPlayer->update(deltaSeconds);
 
-	const Transform& playerTransform = RenderingContext::get()->camera.transform;
-	glm::vec3 playerPos(playerTransform.xPos, playerTransform.yPos, playerTransform.zPos);
-	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(playerPos);
+	glm::vec3 currentChunk = ChunkManager::instance()->getCurrentChunk(gPlayer->getPosition());
 
 	// Spooky hack lol
 	static glm::vec3 lastChunk(currentChunk.x + 1.0f, currentChunk.y, currentChunk.z);
@@ -283,13 +338,26 @@ void update(float32 deltaSeconds) {
 	}
 	ChunkManager::instance()->uploadQueuedChunk();
 
+	static glm::vec3 position;
+
+	if (FREE_CAM_ON)
+	{
+		position = glm::vec3(RenderingContext::get()->camera.transform.xPos,
+			RenderingContext::get()->camera.transform.yPos,
+			RenderingContext::get()->camera.transform.zPos);
+	}
+	else
+	{
+		position = gPlayer->getPosition();
+	}
+
 	chunkShader->use();
-	chunkShader->setUniform("viewPos", playerPos);
+	chunkShader->setUniform("viewPos", position);
 
 	static float32 panner = 0;
 	panner += 0.05 * deltaSeconds;
 	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->use();
-	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("viewPos", playerPos);
+	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("viewPos", position);
 	RenderingContext::get()->shaderCache.getShaderProgram("water_shader")->setUniform("panner", panner);
 }
 

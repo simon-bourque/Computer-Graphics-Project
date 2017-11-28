@@ -24,13 +24,12 @@ FreeCameraController::FreeCameraController(Camera* camera) :
 	InputManager::instance()->registerMouseBtnCallback(std::bind(&FreeCameraController::onMouseButton, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-
 FreeCameraController::~FreeCameraController() {}
 
 void FreeCameraController::update(float32 deltaSeconds) {
 	const static float32 SPEED = 100.0f;
 	const static float32 ROTATE_SPEED = 0.01f;
-	
+
 	float32 dx = 0;
 	float32 dy = 0;
 	float32 dz = 0;
@@ -85,7 +84,7 @@ void FreeCameraController::update(float32 deltaSeconds) {
 	}
 
 	if (roll != 0) {
-		//m_camera->transform.rotateLocal(0, 0, roll * ROTATE_SPEED * 100 * deltaSeconds);
+		m_camera->transform.rotateLocal(0, 0, roll * ROTATE_SPEED * 100 * deltaSeconds);
 	}
 }
 

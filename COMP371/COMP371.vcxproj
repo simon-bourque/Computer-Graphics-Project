@@ -159,11 +159,13 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FreeCameraController.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelCache.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderingContext.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderCache.cpp" />
@@ -179,11 +181,16 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClCompile Include="TreeBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABBCollider.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="FreeCameraController.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Manifold.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Profiling.h" />
     <ClInclude Include="RenderingContext.h" />
     <ClInclude Include="ShaderProgram.h" />
@@ -191,6 +198,7 @@ copy /Y "$(SolutionDir)lib\x64\ProfilerCore64.dll" "$(OutDir)"</Command>
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Block.h" />

@@ -13,6 +13,10 @@ void Transform::translate(float32 x, float32 y, float32 z) {
 	zPos += z;
 }
 
+void Transform::translate(const glm::vec3& displacement) {
+	translate(displacement.x, displacement.y, displacement.z);
+}
+
 void Transform::translateLocal(float32 x, float32 y, float32 z) {
 	glm::vec3 delta = glm::rotate(rotation, glm::vec3(x, y, z));
 

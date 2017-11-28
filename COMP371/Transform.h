@@ -21,6 +21,7 @@ struct Transform {
 	virtual ~Transform();
 
 	void translate(float32 x, float32 y, float32 z);
+	void translate(const glm::vec3& displacement);
 	void translateLocal(float32 x, float32 y, float32 z);
 	void rotate(float32 pitch, float32 yaw, float32 roll);
 	void rotateLocal(float32 pitch, float32 yaw, float32 roll);

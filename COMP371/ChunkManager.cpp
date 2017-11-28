@@ -8,6 +8,8 @@
 
 #include "Profiling.h"
 
+//#define SEPERATE_FOLIAGE_VOXELS	// Comment me to filter out foliage voxels
+
 constexpr int64 encodePosition(int32 x, int32 z)
 {
 	return ((int64)x << 32) | ((int64)z & 0x00000000FFFFFFFF);
@@ -208,6 +210,23 @@ glm::vec3 ChunkManager::getCurrentChunk(glm::vec3 playerPosition) const
 	return glm::vec3(flooredX, 0, flooredZ);
 }
 
+
+bool ChunkManager::getChunkHandle(glm::vec3 currentChunk, Chunk& chunky)
+{
+	int64 chunkPosition = encodePosition(currentChunk.x, currentChunk.z);
+
+	auto search = cmLoadedChunks.find(chunkPosition);
+	if (search != cmLoadedChunks.end())
+	{
+		chunky = cmLoadedChunks.at(chunkPosition);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 ChunkManager::~ChunkManager()
 {
 	CloseHandle(cmSemaphore);
@@ -230,6 +249,13 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	std::vector<float32> normals;
 	std::vector<uint32> indices;
 	std::vector<GLuint> vbos;
+	std::vector<glm::vec3> cloud;
+	cloud.reserve(chunkData.size());
+
+#ifdef SEPERATE_FOLIAGE_VOXELS
+	std::vector<glm::vec3> fcloud;
+	fcloud.reserve(500);	// not scientific
+#endif
 
 	cube::fill(vertices, uvCoords, normals, indices);
 
@@ -279,6 +305,19 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 		positions[(i * 3) + 1] = pos.y;
 		positions[(i * 3) + 2] = pos.z;
 		textureIndices[i] = type;
+		int x = pos.x;
+		int y = pos.y;
+		int z = pos.z;
+
+#ifdef SEPERATE_FOLIAGE_VOXELS
+		BlockType t = chunkData[i].getBlockType();
+		if (t == BlockType::LEAVES || t == BlockType::LOG)
+			fcloud.push_back(pos);
+		else
+			cloud.push_back(pos);
+#else
+		cloud.push_back(pos);
+#endif
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
@@ -306,6 +345,10 @@ void ChunkManager::uploadChunk(const glm::vec3& chunkPosition, const std::vector
 	chunky.setVao(chunkVao);
 	chunky.setVbos(vbos);
 	chunky.setBlockCount(chunkData.size());
+	chunky.setBlockPositions(cloud);
+#ifdef SEPERATE_FOLIAGE_VOXELS
+	chunky.setFoliageBlockPositions(fcloud);
+#endif
 	cmLoadedChunks[encodePosition(chunkPosition.x, chunkPosition.z)] = chunky;
 	cmLoadingChunks.erase(encodePosition(chunkPosition.x, chunkPosition.z));
 }
