@@ -48,6 +48,11 @@ void Player::update(float32 deltaSeconds)
 	ChunkManager* cm = ChunkManager::instance();
 	m_chunkValid = cm->getChunkHandle(cm->getCurrentChunk(m_currentPosition), m_currentChunk);
 
+	// DONT UPDATE ME IF MY CHUNK ISNT VALID YET GOOOSH
+	if (!m_chunkValid) {
+		return;
+	}
+
 	static bool hasLanded = false;
 
 	float32 dx = 0;
