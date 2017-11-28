@@ -2,17 +2,17 @@
 #include "ChunkManager.h"
 #include "TreeBuilder.h"
 
-const float TerrainBuilder::MAX_WATER_ELEVATION = 0.18f;
-const float TerrainBuilder::MAX_SAND_ELEVATION = 0.195f;
-const float TerrainBuilder::MAX_DIRT_ELEVATION = 0.25f;
-const float TerrainBuilder::MAX_GRASS_ELEVATION = 0.4f;
+const float TerrainBuilder::MAX_WATER_ELEVATION = 0.48f;
+const float TerrainBuilder::MAX_SAND_ELEVATION = 0.52f;
+const float TerrainBuilder::MAX_DIRT_ELEVATION = 0.60f;
+const float TerrainBuilder::MAX_GRASS_ELEVATION = 0.8f;
 
 TerrainBuilder::TerrainBuilder(int seed)
 {
 	noiseGenerator.SetSeed(seed);
 	noiseGenerator.SetNoiseType(FastNoise::PerlinFractal);
-	noiseGenerator.SetFractalType(FastNoise::Billow);
-	noiseGenerator.SetFrequency(0.0035f);
+	noiseGenerator.SetFractalType(FastNoise::RigidMulti);
+	noiseGenerator.SetFrequency(0.005f);
 	noiseGenerator.SetFractalOctaves(5);
 
 	TreeNoiseGenerator.SetSeed(seed);
