@@ -14,6 +14,13 @@ public:
 	TerrainBuilder(int seed);
 	~TerrainBuilder();
 	vector<Block> getChunkBlocks(Chunk chunk);
+
+	// In percentage of the top block elevation
+	static float const MAX_WATER_ELEVATION;
+	static const float  MAX_SAND_ELEVATION;
+	static const float MAX_DIRT_ELEVATION;
+	static const float MAX_GRASS_ELEVATION;
+
 private:
 	FastNoise noiseGenerator;
 	FastNoise TreeNoiseGenerator;

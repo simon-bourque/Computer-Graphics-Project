@@ -7,11 +7,13 @@
 #include "RenderingContext.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "TerrainBuilder.h"
+#include "ChunkManager.h"
 
 WaterRenderer* WaterRenderer::s_instance = nullptr;
 
 WaterRenderer::WaterRenderer() : 
-	m_y(100.0f),
+	m_y(TerrainBuilder::MAX_WATER_ELEVATION*ChunkManager::CHUNKHEIGHT),
 	m_textureTileFactor(1.0f)
 {
 	m_waterShader = RenderingContext::get()->shaderCache.loadShaderProgram("water_shader", "water_vert.glsl", "water_frag.glsl");

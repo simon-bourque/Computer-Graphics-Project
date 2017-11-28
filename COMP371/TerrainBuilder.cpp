@@ -2,11 +2,17 @@
 #include "ChunkManager.h"
 #include "TreeBuilder.h"
 
+const float TerrainBuilder::MAX_WATER_ELEVATION = 0.18f;
+const float TerrainBuilder::MAX_SAND_ELEVATION = 0.195f;
+const float TerrainBuilder::MAX_DIRT_ELEVATION = 0.25f;
+const float TerrainBuilder::MAX_GRASS_ELEVATION = 0.4f;
+
 TerrainBuilder::TerrainBuilder(int seed)
 {
 	noiseGenerator.SetSeed(seed);
 	noiseGenerator.SetNoiseType(FastNoise::PerlinFractal);
-	noiseGenerator.SetFrequency(0.005f);
+	noiseGenerator.SetFractalType(FastNoise::Billow);
+	noiseGenerator.SetFrequency(0.0035f);
 	noiseGenerator.SetFractalOctaves(5);
 
 	TreeNoiseGenerator.SetSeed(seed);
@@ -118,6 +124,9 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 			if (heightDifference > 1.0f)
 				duplicateBlockVertically(chunkBlocks[index], int(nearbyint(heightDifference)), chunkBlocks);
 
+			// top 40% of grass blocks have christmas trees
+			const float ChristmasTreeElevation = (MAX_GRASS_ELEVATION - MAX_DIRT_ELEVATION)*0.6f + MAX_DIRT_ELEVATION;
+
 			// Load Tree
 			if (chunkBlocks[index].getBlockType() == BlockType::GRASS)
 			{
@@ -127,7 +136,7 @@ void TerrainBuilder::fillChunkGaps(vector<Block>& chunkBlocks)
 					if ((int)leftBlockPos.y == (int)rightBlockPos.y && ((int)upBlockPos.y == (int)downBlockPos.y) && downBlockPos.y == (int)currBlockPos.y && rightBlockPos.y == (int)currBlockPos.y)
 					{	
 						// Depending on elevation make different kinds of trees
-						if(currBlockPos.y < 0.6*ChunkManager::CHUNKHEIGHT)
+						if(currBlockPos.y < ChristmasTreeElevation*ChunkManager::CHUNKHEIGHT)
 							treeGen.makeTree(chunkBlocks[index].getPosition(),noise);
 						else
 							treeGen.makeChristmasTree(chunkBlocks[index].getPosition(),noise);
@@ -195,8 +204,8 @@ void TerrainBuilder::fillClosestPrimes(int* closestPrimes)
 BlockType TerrainBuilder::getBlockType(const float elevation)
 {
 	int maxHeight = ChunkManager::CHUNKHEIGHT;
-	if(elevation < 0.4f * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
-	else if (elevation < 0.45f * maxHeight) return BlockType::DIRT;
-	else if (elevation < 0.75f * maxHeight) return BlockType::GRASS;
+	if(elevation < MAX_SAND_ELEVATION * maxHeight)	return BlockType::SAND; // Should be the elevation under which water shows up
+	else if (elevation < MAX_DIRT_ELEVATION * maxHeight) return BlockType::DIRT;
+	else if (elevation < MAX_GRASS_ELEVATION * maxHeight) return BlockType::GRASS;
 	else  return BlockType::SNOW;
 }
