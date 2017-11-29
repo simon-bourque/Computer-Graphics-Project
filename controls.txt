@@ -1,0 +1,24 @@
+------------- Player -------------
+W - Move forward
+S - Move backward
+A - Strafe left
+D - Strafe right
+
+Mouse X - Yaw player
+Mouse Y - Pitch camera
+
+-------------- Debug Camera --------
+W - Move forward
+S - Move backward
+A - Strafe left
+D - Strafe right
+
+Mouse X + Right Mouse Button - Yaw camera
+Mouse Y  + Right Mouse Button - Pitch camera
+
+
+----------- Misc --------------------
+ESC - Quit
+F1 - Lock/unlock mouse cursor
+F2 - Toggle fullscreen
+F3 - Switch between player and debug camera
