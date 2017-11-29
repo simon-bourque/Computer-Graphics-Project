@@ -421,7 +421,7 @@ void Player::resolveChunkIntersection(const Manifold& manifold, const AABBCollid
 
 	//glm::vec3 displacement = glm::proj(seperation, -glm::normalize(directionOfMovement));
 	glm::vec3 displacement = seperation;
-	std::cout << "(" << displacement.x << ", " << displacement.y << ", " << displacement.z << ")" << std::endl;
+	//std::cout << "(" << displacement.x << ", " << displacement.y << ", " << displacement.z << ")" << std::endl;
 	
 	// And just a hint of bias
 	const static float32 bias = 0.0005f;
